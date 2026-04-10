@@ -40,6 +40,7 @@
             income_btn = new Button();
             label2 = new Label();
             pictureBox2 = new PictureBox();
+            incomeForm1 = new IncomeForm();
             categoryForm1 = new CategoryForm();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -199,13 +200,22 @@
             pictureBox2.TabIndex = 2;
             pictureBox2.TabStop = false;
             // 
+            // incomeForm1
+            // 
+            incomeForm1.Location = new Point(317, 208);
+            incomeForm1.Margin = new Padding(4);
+            incomeForm1.Name = "incomeForm1";
+            incomeForm1.Size = new Size(2500, 930);
+            incomeForm1.TabIndex = 5;
+            incomeForm1.Load += incomeForm1_Load;
+            // 
             // categoryForm1
             // 
-            categoryForm1.Location = new Point(223, 60);
+            categoryForm1.Location = new Point(238, 208);
+            categoryForm1.Margin = new Padding(4);
             categoryForm1.Name = "categoryForm1";
-            categoryForm1.Size = new Size(1818, 775);
-            categoryForm1.TabIndex = 2;
-            categoryForm1.Load += CategoryForm1_Load;
+            categoryForm1.Size = new Size(2500, 930);
+            categoryForm1.TabIndex = 5;
             // 
             // MainForm
             // 
@@ -213,6 +223,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1684, 680);
             Controls.Add(categoryForm1);
+            Controls.Add(incomeForm1);
             Controls.Add(panel2);
             Controls.Add(panel1);
             Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -245,6 +256,7 @@
         private Button dashboard_btn;
         private Button addCategory_btn;
         private Button income_btn;
+        private IncomeForm incomeForm1;
         private CategoryForm categoryForm1;
     }
 }

@@ -9,12 +9,50 @@ namespace IncomeExpensesTrackingManagementSystem
     /// </summary>
     public partial class MainForm : Form
     {
+        private int _currentUserId;
+
         /// <summary>
         /// Initializes a new instance of the MainForm class.
         /// </summary>
         public MainForm()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Sets the current user ID and initializes all forms with user data.
+        /// </summary>
+        /// <param name="userId">The ID of the logged-in user.</param>
+        public void SetUserId(int userId)
+        {
+            _currentUserId = userId;
+            InitializeUserForms();
+        }
+
+        /// <summary>
+        /// Initializes all user controls with the current user's data.
+        /// </summary>
+        private void InitializeUserForms()
+        {
+            try
+            {
+                // Initialize Income Form
+                if (incomeForm1 != null)
+                {
+                    incomeForm1.SetUserId(_currentUserId);
+                    incomeForm1.LoadIncomeData();
+                }
+
+                // Initialize Categories (already loads all categories)
+                if (categoryForm1 != null)
+                {
+                    categoryForm1.LoadCategories();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error initializing forms: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>
@@ -26,6 +64,15 @@ namespace IncomeExpensesTrackingManagementSystem
             {
                 Application.Exit();
             }
+        }
+
+        /// <summary>
+        /// Displays the income form and refreshes its data.
+        /// </summary>
+        private void IncomeBtn_Click(object sender, EventArgs e)
+        {
+            incomeForm1?.BringToFront();
+            incomeForm1?.LoadIncomeData();
         }
 
         /// <summary>
@@ -57,6 +104,11 @@ namespace IncomeExpensesTrackingManagementSystem
         }
 
         private void CategoryForm1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void incomeForm1_Load(object sender, EventArgs e)
         {
 
         }
