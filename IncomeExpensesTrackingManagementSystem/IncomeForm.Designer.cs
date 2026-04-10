@@ -144,6 +144,7 @@
             button3.TabIndex = 13;
             button3.Text = "Clear";
             button3.UseVisualStyleBackColor = false;
+            button3.Click += Button3_Click;
             // 
             // button1
             // 
@@ -172,6 +173,7 @@
             category_addBtn.TabIndex = 11;
             category_addBtn.Text = "Add";
             category_addBtn.UseVisualStyleBackColor = false;
+            category_addBtn.Click += Category_AddBtn_Click;
             // 
             // dateTimePicker1
             // 

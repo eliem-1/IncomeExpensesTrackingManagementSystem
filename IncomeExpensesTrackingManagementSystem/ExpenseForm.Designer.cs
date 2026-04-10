@@ -125,6 +125,7 @@ namespace IncomeExpensesTrackingManagementSystem
             expense_deleteBtn.TabIndex = 14;
             expense_deleteBtn.Text = "Delete";
             expense_deleteBtn.UseVisualStyleBackColor = false;
+            expense_deleteBtn.Click += ExpenseDeleteBtn_Click;
             // 
             // expense_clearBtn
             // 
@@ -167,6 +168,7 @@ namespace IncomeExpensesTrackingManagementSystem
             expense_addBtn.TabIndex = 11;
             expense_addBtn.Text = "Add";
             expense_addBtn.UseVisualStyleBackColor = false;
+            expense_addBtn.Click += ExpenseAddBtn_Click;
             // 
             // expense_date
             // 

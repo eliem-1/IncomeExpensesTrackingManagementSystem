@@ -42,6 +42,7 @@
             pictureBox2 = new PictureBox();
             incomeForm1 = new IncomeForm();
             categoryForm1 = new CategoryForm();
+            dashboardForm2 = new DashboardForm();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             panel2.SuspendLayout();
@@ -203,7 +204,7 @@
             // 
             // incomeForm1
             // 
-            incomeForm1.Location = new Point(359, 181);
+            incomeForm1.Location = new Point(224, 60);
             incomeForm1.Margin = new Padding(4);
             incomeForm1.Name = "incomeForm1";
             incomeForm1.Size = new Size(2500, 930);
@@ -212,17 +213,26 @@
             // 
             // categoryForm1
             // 
-            categoryForm1.Location = new Point(344, 382);
+            categoryForm1.Location = new Point(224, 60);
             categoryForm1.Margin = new Padding(4);
             categoryForm1.Name = "categoryForm1";
             categoryForm1.Size = new Size(2500, 930);
             categoryForm1.TabIndex = 5;
+            // 
+            // dashboardForm2
+            // 
+            dashboardForm2.Location = new Point(224, 60);
+            dashboardForm2.Margin = new Padding(4, 4, 4, 4);
+            dashboardForm2.Name = "dashboardForm2";
+            dashboardForm2.Size = new Size(2500, 930);
+            dashboardForm2.TabIndex = 5;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(11F, 24F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1684, 680);
+            Controls.Add(dashboardForm2);
             Controls.Add(categoryForm1);
             Controls.Add(incomeForm1);
             Controls.Add(panel2);
@@ -261,5 +271,6 @@
         private CategoryForm categoryForm1;
         private DashboardForm dashboardForm1;
         private ExpenseForm expenseForm1;
+        private DashboardForm dashboardForm2;
     }
 }
