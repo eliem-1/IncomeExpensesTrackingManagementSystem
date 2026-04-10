@@ -178,6 +178,7 @@
             income_btn.TabIndex = 7;
             income_btn.Text = "Income";
             income_btn.UseVisualStyleBackColor = false;
+            income_btn.Click += IncomeBtn_Click;
             // 
             // label2
             // 
@@ -202,7 +203,7 @@
             // 
             // incomeForm1
             // 
-            incomeForm1.Location = new Point(317, 208);
+            incomeForm1.Location = new Point(359, 181);
             incomeForm1.Margin = new Padding(4);
             incomeForm1.Name = "incomeForm1";
             incomeForm1.Size = new Size(2500, 930);
@@ -211,7 +212,7 @@
             // 
             // categoryForm1
             // 
-            categoryForm1.Location = new Point(238, 208);
+            categoryForm1.Location = new Point(344, 382);
             categoryForm1.Margin = new Padding(4);
             categoryForm1.Name = "categoryForm1";
             categoryForm1.Size = new Size(2500, 930);
@@ -258,5 +259,7 @@
         private Button income_btn;
         private IncomeForm incomeForm1;
         private CategoryForm categoryForm1;
+        private DashboardForm dashboardForm1;
+        private ExpenseForm expenseForm1;
     }
 }

@@ -36,6 +36,13 @@ namespace IncomeExpensesTrackingManagementSystem
         {
             try
             {
+                // Initialize Dashboard Form
+                if (dashboardForm1 != null)
+                {
+                    dashboardForm1.SetUserId(_currentUserId);
+                    dashboardForm1.LoadDashboardData();
+                }
+
                 // Initialize Income Form
                 if (incomeForm1 != null)
                 {
@@ -43,11 +50,21 @@ namespace IncomeExpensesTrackingManagementSystem
                     incomeForm1.LoadIncomeData();
                 }
 
+                // Initialize Expense Form
+                if (expenseForm1 != null)
+                {
+                    expenseForm1.SetUserId(_currentUserId);
+                    expenseForm1.LoadExpenseData();
+                }
+
                 // Initialize Categories (already loads all categories)
                 if (categoryForm1 != null)
                 {
                     categoryForm1.LoadCategories();
                 }
+
+                // Display Dashboard as default
+                dashboardForm1?.BringToFront();
             }
             catch (Exception ex)
             {
@@ -67,12 +84,30 @@ namespace IncomeExpensesTrackingManagementSystem
         }
 
         /// <summary>
+        /// Displays the dashboard form and refreshes its data.
+        /// </summary>
+        private void DashboardBtn_Click(object sender, EventArgs e)
+        {
+            dashboardForm1?.BringToFront();
+            dashboardForm1?.LoadDashboardData();
+        }
+
+        /// <summary>
         /// Displays the income form and refreshes its data.
         /// </summary>
         private void IncomeBtn_Click(object sender, EventArgs e)
         {
             incomeForm1?.BringToFront();
             incomeForm1?.LoadIncomeData();
+        }
+
+        /// <summary>
+        /// Displays the expense form and refreshes its data.
+        /// </summary>
+        private void ExpensesBtn_Click(object sender, EventArgs e)
+        {
+            expenseForm1?.BringToFront();
+            expenseForm1?.LoadExpenseData();
         }
 
         /// <summary>
