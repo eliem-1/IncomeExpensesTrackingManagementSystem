@@ -1,4 +1,4 @@
-﻿namespace IncomeExpensesTrackingManagementSystem
+namespace IncomeExpensesTrackingManagementSystem
 {
     partial class Form1
     {
@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
-            login_SignUpbtn = new Button();
+            login_SignUpBtn = new Button();
             label6 = new Label();
             label2 = new Label();
             pictureBox1 = new PictureBox();
-            label1 = new Label();
+            close_click = new Label();
             label3 = new Label();
             label4 = new Label();
             login_username = new TextBox();
@@ -42,13 +42,13 @@
             login_btn = new Button();
             login_showPass = new CheckBox();
             panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(pictureBox1)).BeginInit();
             SuspendLayout();
             // 
             // panel1
             // 
             panel1.BackColor = Color.Green;
-            panel1.Controls.Add(login_SignUpbtn);
+            panel1.Controls.Add(login_SignUpBtn);
             panel1.Controls.Add(label6);
             panel1.Controls.Add(label2);
             panel1.Controls.Add(pictureBox1);
@@ -57,22 +57,23 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(325, 450);
             panel1.TabIndex = 0;
-            panel1.Paint += panel1_Paint;
+            panel1.Paint += new System.Windows.Forms.PaintEventHandler(Panel1_Paint);
             // 
-            // login_SignUpbtn
+            // login_SignUpBtn
             // 
-            login_SignUpbtn.BackColor = Color.Green;
-            login_SignUpbtn.FlatAppearance.MouseDownBackColor = Color.Green;
-            login_SignUpbtn.FlatAppearance.MouseOverBackColor = Color.Green;
-            login_SignUpbtn.FlatStyle = FlatStyle.Flat;
-            login_SignUpbtn.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            login_SignUpbtn.ForeColor = Color.White;
-            login_SignUpbtn.Location = new Point(12, 382);
-            login_SignUpbtn.Name = "login_SignUpbtn";
-            login_SignUpbtn.Size = new Size(290, 45);
-            login_SignUpbtn.TabIndex = 9;
-            login_SignUpbtn.Text = "Sign Up";
-            login_SignUpbtn.UseVisualStyleBackColor = false;
+            login_SignUpBtn.BackColor = Color.Green;
+            login_SignUpBtn.FlatAppearance.MouseDownBackColor = Color.Green;
+            login_SignUpBtn.FlatAppearance.MouseOverBackColor = Color.Green;
+            login_SignUpBtn.FlatStyle = FlatStyle.Flat;
+            login_SignUpBtn.Font = new Font("Tahoma", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            login_SignUpBtn.ForeColor = Color.White;
+            login_SignUpBtn.Location = new Point(12, 382);
+            login_SignUpBtn.Name = "login_SignUpBtn";
+            login_SignUpBtn.Size = new Size(290, 45);
+            login_SignUpBtn.TabIndex = 9;
+            login_SignUpBtn.Text = "Sign Up";
+            login_SignUpBtn.UseVisualStyleBackColor = false;
+            login_SignUpBtn.Click += new System.EventHandler(LoginSignUpBtn_Click);
             // 
             // label6
             // 
@@ -106,16 +107,17 @@
             pictureBox1.TabIndex = 2;
             pictureBox1.TabStop = false;
             // 
-            // label1
+            // close_click
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Arial Rounded MT Bold", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label1.Location = new Point(767, 9);
-            label1.Name = "label1";
-            label1.Size = new Size(21, 21);
-            label1.TabIndex = 1;
-            label1.Text = "X";
-            label1.Click += label1_Click;
+            close_click.AutoSize = true;
+            close_click.Cursor = Cursors.Hand;
+            close_click.Font = new Font("Arial Rounded MT Bold", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            close_click.Location = new Point(767, 9);
+            close_click.Name = "close_click";
+            close_click.Size = new Size(21, 21);
+            close_click.TabIndex = 1;
+            close_click.Text = "X";
+            close_click.Click += new System.EventHandler(Label1_Click);
             // 
             // label3
             // 
@@ -158,8 +160,10 @@
             login_password.Font = new Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             login_password.Location = new Point(359, 306);
             login_password.Name = "login_password";
+            login_password.PasswordChar = '*';
             login_password.Size = new Size(416, 33);
             login_password.TabIndex = 6;
+            login_password.TextChanged += new System.EventHandler(LoginPasswordTextChanged);
             // 
             // login_btn
             // 
@@ -176,6 +180,7 @@
             login_btn.TabIndex = 7;
             login_btn.Text = "Login";
             login_btn.UseVisualStyleBackColor = false;
+            login_btn.Click += new System.EventHandler(LoginBtn_Click);
             // 
             // login_showPass
             // 
@@ -186,6 +191,7 @@
             login_showPass.TabIndex = 8;
             login_showPass.Text = "Show Password";
             login_showPass.UseVisualStyleBackColor = true;
+            login_showPass.CheckedChanged += new System.EventHandler(LoginShowPassCheckedChanged);
             // 
             // Form1
             // 
@@ -199,16 +205,16 @@
             Controls.Add(login_username);
             Controls.Add(label4);
             Controls.Add(label3);
-            Controls.Add(label1);
+            Controls.Add(close_click);
             Controls.Add(panel1);
             FormBorderStyle = FormBorderStyle.None;
             Name = "Form1";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Form1";
-            Load += Form1_Load;
+            Load += new System.EventHandler(Form1_Load);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(pictureBox1)).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -216,7 +222,7 @@
         #endregion
 
         private Panel panel1;
-        private Label label1;
+        private Label close_click;
         private PictureBox pictureBox1;
         private Label label2;
         private Label label3;
@@ -226,7 +232,7 @@
         private TextBox login_password;
         private Button login_btn;
         private CheckBox login_showPass;
-        private Button login_SignUpbtn;
+        private Button login_SignUpBtn;
         private Label label6;
     }
 }
