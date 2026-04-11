@@ -140,6 +140,7 @@ namespace IncomeExpensesTrackingManagementSystem
             expense_clearBtn.TabIndex = 13;
             expense_clearBtn.Text = "Clear";
             expense_clearBtn.UseVisualStyleBackColor = false;
+            expense_clearBtn.Click += ExpenseClearBtn_Click;
             // 
             // expense_updateBtn
             // 
@@ -154,6 +155,7 @@ namespace IncomeExpensesTrackingManagementSystem
             expense_updateBtn.TabIndex = 12;
             expense_updateBtn.Text = "Update";
             expense_updateBtn.UseVisualStyleBackColor = false;
+            expense_updateBtn.Click += ExpenseUpdateBtn_Click;
             // 
             // expense_addBtn
             // 
@@ -172,6 +174,8 @@ namespace IncomeExpensesTrackingManagementSystem
             // 
             // expense_date
             // 
+            expense_date.CustomFormat = "MM-dd-yyyy";
+            expense_date.Format = DateTimePickerFormat.Custom;
             expense_date.Location = new Point(686, 144);
             expense_date.Name = "expense_date";
             expense_date.Size = new Size(250, 27);
@@ -226,6 +230,7 @@ namespace IncomeExpensesTrackingManagementSystem
             // 
             // expense_category
             // 
+            expense_category.DropDownStyle = ComboBoxStyle.DropDownList;
             expense_category.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             expense_category.FormattingEnabled = true;
             expense_category.Location = new Point(115, 33);

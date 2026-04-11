@@ -10,6 +10,7 @@ namespace IncomeExpensesTrackingManagementSystem
     public partial class MainForm : Form
     {
         private int _currentUserId;
+        private string _currentUsername = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the MainForm class.
@@ -23,9 +24,11 @@ namespace IncomeExpensesTrackingManagementSystem
         /// Sets the current user ID and initializes all forms with user data.
         /// </summary>
         /// <param name="userId">The ID of the logged-in user.</param>
-        public void SetUserId(int userId)
+        public void SetUserId(int userId, string username)
         {
             _currentUserId = userId;
+            _currentUsername = username;
+            label2.Text = $"Welcome, {_currentUsername}";
             InitializeUserForms();
         }
 
@@ -37,31 +40,19 @@ namespace IncomeExpensesTrackingManagementSystem
             try
             {
                 // Initialize Dashboard Form
-                if (dashboardForm1 != null)
-                {
-                    dashboardForm1.SetUserId(_currentUserId);
-                    dashboardForm1.LoadDashboardData();
-                }
+                dashboardForm1?.SetUserId(_currentUserId);
+                dashboardForm1?.LoadDashboardData();
 
                 // Initialize Income Form
-                if (incomeForm1 != null)
-                {
-                    incomeForm1.SetUserId(_currentUserId);
-                    incomeForm1.LoadIncomeData();
-                }
+                incomeForm1?.SetUserId(_currentUserId);
+                incomeForm1?.LoadIncomeData();
 
                 // Initialize Expense Form
-                if (expenseForm1 != null)
-                {
-                    expenseForm1.SetUserId(_currentUserId);
-                    expenseForm1.LoadExpenseData();
-                }
+                expenseForm1?.SetUserId(_currentUserId);
+                expenseForm1?.LoadExpenseData();
 
                 // Initialize Categories (already loads all categories)
-                if (categoryForm1 != null)
-                {
-                    categoryForm1.LoadCategories();
-                }
+                categoryForm1?.LoadCategories();
 
                 // Display Dashboard as default
                 dashboardForm1?.BringToFront();
@@ -131,21 +122,6 @@ namespace IncomeExpensesTrackingManagementSystem
 
                 this.Hide();
             }
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void CategoryForm1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void incomeForm1_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }

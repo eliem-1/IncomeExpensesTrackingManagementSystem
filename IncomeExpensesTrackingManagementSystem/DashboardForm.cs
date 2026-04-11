@@ -23,9 +23,6 @@ namespace IncomeExpensesTrackingManagementSystem
             LoadDashboardData();
         }
 
-        /// <summary>
-        /// Loads comprehensive dashboard data including totals, monthly stats, and metrics.
-        /// </summary>
         public void LoadDashboardData()
         {
             if (_currentUserId <= 0)
@@ -39,29 +36,59 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                // Total Income
-                decimal totalIncome = GetAmount(connect, "SELECT ISNULL(SUM(trans_amount), 0) FROM transactions WHERE user_id = @user_id AND trans_type = 'Income'");
-                label2.Text = totalIncome.ToString("C2", UsCulture);
+                // --- Income cards (Row 1) ---
+                // Today's Income
+                label5.Text = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Income' AND CAST(trans_date AS DATE)=CAST(GETDATE() AS DATE)")
+                    .ToString("C2", UsCulture);
 
-                // Total Expenses
-                decimal totalExpenses = GetAmount(connect, "SELECT ISNULL(SUM(trans_amount), 0) FROM transactions WHERE user_id = @user_id AND trans_type = 'Expense'");
-                label4.Text = totalExpenses.ToString("C2", UsCulture);
+                // Yesterday's Income
+                label6.Text = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Income' AND CAST(trans_date AS DATE)=CAST(DATEADD(DAY,-1,GETDATE()) AS DATE)")
+                    .ToString("C2", UsCulture);
 
-                // Net Balance
-                decimal netBalance = GetAmount(connect, "SELECT ISNULL(SUM(CASE WHEN trans_type = 'Income' THEN trans_amount ELSE -trans_amount END), 0) FROM transactions WHERE user_id = @user_id");
-                label6.Text = netBalance.ToString("C2", UsCulture);
+                // This Month's Income
+                decimal monthlyIncome = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Income' AND MONTH(trans_date)=MONTH(GETDATE()) AND YEAR(trans_date)=YEAR(GETDATE())");
+                label7.Text = monthlyIncome.ToString("C2", UsCulture);
 
-                // Monthly Income (Current Month)
-                decimal monthlyIncome = GetAmount(connect, "SELECT ISNULL(SUM(trans_amount), 0) FROM transactions WHERE user_id = @user_id AND trans_type = 'Income' AND MONTH(trans_date) = MONTH(GETDATE()) AND YEAR(trans_date) = YEAR(GETDATE())");
+                // This Year's Income
+                label8.Text = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Income' AND YEAR(trans_date)=YEAR(GETDATE())")
+                    .ToString("C2", UsCulture);
 
-                // Monthly Expenses (Current Month)
-                decimal monthlyExpenses = GetAmount(connect, "SELECT ISNULL(SUM(trans_amount), 0) FROM transactions WHERE user_id = @user_id AND trans_type = 'Expense' AND MONTH(trans_date) = MONTH(GETDATE()) AND YEAR(trans_date) = YEAR(GETDATE())");
+                // --- Expense cards (Row 2) ---
+                // Today's Expenses
+                label9.Text = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Expense' AND CAST(trans_date AS DATE)=CAST(GETDATE() AS DATE)")
+                    .ToString("C2", UsCulture);
 
-                // Savings Rate (This Month)
-                decimal savingsRate = monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100 : 0;
+                // Yesterday's Expenses
+                label10.Text = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Expense' AND CAST(trans_date AS DATE)=CAST(DATEADD(DAY,-1,GETDATE()) AS DATE)")
+                    .ToString("C2", UsCulture);
 
-                // Update labels with monthly data if available in the form
-                UpdateAdditionalMetrics(monthlyIncome, monthlyExpenses, savingsRate, connect);
+                // This Month's Expenses
+                decimal monthlyExpenses = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Expense' AND MONTH(trans_date)=MONTH(GETDATE()) AND YEAR(trans_date)=YEAR(GETDATE())");
+                label11.Text = monthlyExpenses.ToString("C2", UsCulture);
+
+                // This Year's Expenses
+                label12.Text = GetAmount(connect,
+                    "SELECT ISNULL(SUM(trans_amount),0) FROM transactions WHERE user_id=@user_id AND trans_type='Expense' AND YEAR(trans_date)=YEAR(GETDATE())")
+                    .ToString("C2", UsCulture);
+
+                // --- Totals (Row 3) ---
+                decimal totalIncome = GetAmount(connect, AppConstants.SelectTotalIncome);
+                label22.Text = totalIncome.ToString("C2", UsCulture);
+
+                decimal totalExpenses = GetAmount(connect, AppConstants.SelectTotalExpense);
+                label24.Text = totalExpenses.ToString("C2", UsCulture);
+
+                // --- Total Balance ---
+                decimal totalBalance = totalIncome - totalExpenses;
+                label26.Text = totalBalance.ToString("C2", UsCulture);
+                label26.ForeColor = totalBalance >= 0 ? Color.Green : Color.Red;
             }
             catch (Exception ex)
             {
@@ -69,70 +96,40 @@ namespace IncomeExpensesTrackingManagementSystem
             }
         }
 
-        /// <summary>
-        /// Gets a single decimal amount from a SQL query.
-        /// </summary>
         private decimal GetAmount(SqlConnection connect, string query)
         {
             using var cmd = new SqlCommand(query, connect);
             cmd.Parameters.Add("@user_id", SqlDbType.Int).Value = _currentUserId;
-
             object result = cmd.ExecuteScalar() ?? 0m;
             return Convert.ToDecimal(result);
         }
 
-        /// <summary>
-        /// Updates additional metrics if dashboard has extended labels.
-        /// </summary>
-        private void UpdateAdditionalMetrics(decimal monthlyIncome, decimal monthlyExpenses, decimal savingsRate, SqlConnection connect)
-        {
-            // These labels may exist in the extended dashboard design
-            // Monthly Income - label8
-            // Monthly Expenses - label7  
-            // Savings Rate - label5
-            if (Controls.Count > 5)
-            {
-                try
-                {
-                    if (Controls["label8"] is Label monthlyIncomeLabel)
-                        monthlyIncomeLabel.Text = monthlyIncome.ToString("C2", UsCulture);
-
-                    if (Controls["label7"] is Label monthlyExpensesLabel)
-                        monthlyExpensesLabel.Text = monthlyExpenses.ToString("C2", UsCulture);
-
-                    if (Controls["label5"] is Label savingsRateLabel)
-                        savingsRateLabel.Text = savingsRate.ToString("F1", UsCulture) + "%";
-                }
-                catch
-                {
-                    // Labels may not exist in current design - that's okay
-                }
-            }
-        }
-
-        /// <summary>
-        /// Resets all dashboard labels to zero.
-        /// </summary>
         private void ResetDashboardDisplay()
         {
-            label2.Text = 0m.ToString("C2", UsCulture);
-            label4.Text = 0m.ToString("C2", UsCulture);
-            label6.Text = 0m.ToString("C2", UsCulture);
+            string zero = 0m.ToString("C2", UsCulture);
+            label5.Text = zero;
+            label6.Text = zero;
+            label7.Text = zero;
+            label8.Text = zero;
+            label9.Text = zero;
+            label10.Text = zero;
+            label11.Text = zero;
+            label12.Text = zero;
+            label22.Text = zero;
+            label24.Text = zero;
+            label26.Text = zero;
         }
 
         private void Panel3_Paint(object sender, PaintEventArgs e)
         {
-            // Dashboard paint event
         }
 
         private void Label1_Click(object sender, EventArgs e)
         {
-            // Settings or profile click
         }
 
         private void Label5_Click(object sender, EventArgs e)
         {
-            // Refresh dashboard
             LoadDashboardData();
         }
     }

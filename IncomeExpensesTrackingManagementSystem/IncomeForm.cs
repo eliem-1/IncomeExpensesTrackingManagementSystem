@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
 using System.Globalization;
-using System.Text;
 using System.Windows.Forms;
 
 namespace IncomeExpensesTrackingManagementSystem
@@ -20,7 +16,8 @@ namespace IncomeExpensesTrackingManagementSystem
         public IncomeForm()
         {
             InitializeComponent();
-            dataGridView1.CellClick += DataGridView1_CellClick;
+            income_dataGridView.CellClick += IncomeDataGridView_CellClick;
+            income_category.SelectedIndexChanged += IncomeCategory_SelectedIndexChanged;
         }
 
         /// <summary>
@@ -41,27 +38,25 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                using var cmd = new SqlCommand(
-                    "SELECT trans_id, cate_id, trans_description, trans_amount, trans_date FROM transactions WHERE user_id = @user_id AND trans_type = 'Income' ORDER BY trans_date DESC",
-                    connect);
-                cmd.Parameters.AddWithValue("@user_id", _currentUserId);
+                using var cmd = new SqlCommand(AppConstants.SelectIncomeTransactions, connect);
+                cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
 
                 SqlDataAdapter adapter = new(cmd);
                 DataTable dt = new();
                 adapter.Fill(dt);
 
-                dataGridView1.DataSource = dt;
+                income_dataGridView.DataSource = dt;
 
                 // Format amount column as currency
-                DataGridViewColumn? amountColumn = dataGridView1.Columns["trans_amount"];
+                DataGridViewColumn? amountColumn = income_dataGridView.Columns["trans_amount"];
                 if (amountColumn != null)
                 {
-                    amountColumn.DefaultCellStyle.Format = "C2";
+                    amountColumn.DefaultCellStyle.Format = AppConstants.CurrencyFormat;
                     amountColumn.DefaultCellStyle.FormatProvider = UsCulture;
                 }
 
                 // Format date column
-                DataGridViewColumn? dateColumn = dataGridView1.Columns["trans_date"];
+                DataGridViewColumn? dateColumn = income_dataGridView.Columns["trans_date"];
                 if (dateColumn != null)
                 {
                     dateColumn.DefaultCellStyle.Format = "MM-dd-yyyy";
@@ -82,7 +77,7 @@ namespace IncomeExpensesTrackingManagementSystem
         {
             try
             {
-                comboBox1.Items.Clear();
+                income_category.Items.Clear();
 
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
@@ -93,7 +88,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 {
                     string categoryName = Convert.ToString(reader["cate_name"]) ?? string.Empty;
                     int categoryId = Convert.ToInt32(reader["cate_id"]);
-                    comboBox1.Items.Add(new CategoryItem(categoryName, categoryId));
+                    income_category.Items.Add(new CategoryItem(categoryName, categoryId));
                 }
             }
             catch (Exception ex)
@@ -105,23 +100,23 @@ namespace IncomeExpensesTrackingManagementSystem
         /// <summary>
         /// Handles the Add button click to add or update an income transaction.
         /// </summary>
-        private void Category_AddBtn_Click(object sender, EventArgs e)
+        private void IncomeAddBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(textBox2.Text) || comboBox1.SelectedIndex == -1)
+            if (string.IsNullOrWhiteSpace(income_amount.Text) || income_category.SelectedIndex == -1)
             {
-                MessageBox.Show("Please fill all required fields", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.FillAllFieldsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else if (!decimal.TryParse(textBox2.Text, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, UsCulture, out decimal amount) || amount <= 0)
+            else if (!decimal.TryParse(income_amount.Text, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, UsCulture, out decimal amount) || amount <= 0)
             {
-                MessageBox.Show("Please enter a valid amount", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.InvalidAmountError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
                 try
                 {
-                    if (comboBox1.SelectedItem is not CategoryItem selectedCategory)
+                    if (income_category.SelectedItem is not CategoryItem selectedCategory)
                     {
-                        MessageBox.Show("Please select a valid category", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(AppConstants.SelectValidCategoryError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -132,31 +127,29 @@ namespace IncomeExpensesTrackingManagementSystem
                     {
                         string updateQuery = "UPDATE transactions SET cate_id = @cate_id, trans_amount = @trans_amount, trans_description = @trans_description, trans_date = @trans_date WHERE trans_id = @trans_id AND user_id = @user_id AND trans_type = 'Income'";
                         using var updateCmd = new SqlCommand(updateQuery, connect);
-                        updateCmd.Parameters.AddWithValue("@cate_id", selectedCategory.Id);
-                        updateCmd.Parameters.AddWithValue("@trans_amount", amount);
-                        updateCmd.Parameters.AddWithValue("@trans_description", textBox3.Text.Trim());
-                        updateCmd.Parameters.AddWithValue("@trans_date", dateTimePicker1.Value.Date);
-                        updateCmd.Parameters.AddWithValue("@trans_id", _selectedTransactionId.Value);
-                        updateCmd.Parameters.AddWithValue("@user_id", _currentUserId);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamCategoryId, selectedCategory.Id);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamAmount, amount);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamDescription, income_description.Text.Trim());
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamTransDate, income_date.Value.Date);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamTransactionId, _selectedTransactionId.Value);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                         updateCmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Income updated successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Income updated successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
-                        string insertQuery = "INSERT INTO transactions (user_id, cate_id, trans_type, trans_amount, trans_description, trans_date) VALUES (@user_id, @cate_id, @trans_type, @trans_amount, @trans_description, @trans_date)";
-
-                        using var cmd = new SqlCommand(insertQuery, connect);
-                        cmd.Parameters.AddWithValue("@user_id", _currentUserId);
-                        cmd.Parameters.AddWithValue("@cate_id", selectedCategory.Id);
-                        cmd.Parameters.AddWithValue("@trans_type", "Income");
-                        cmd.Parameters.AddWithValue("@trans_amount", amount);
-                        cmd.Parameters.AddWithValue("@trans_description", textBox3.Text.Trim());
-                        cmd.Parameters.AddWithValue("@trans_date", dateTimePicker1.Value.Date);
+                        using var cmd = new SqlCommand(AppConstants.InsertTransaction, connect);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamCategoryId, selectedCategory.Id);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamTransactionType, AppConstants.TransactionTypeIncome);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamAmount, amount);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamDescription, income_description.Text.Trim());
+                        cmd.Parameters.AddWithValue(AppConstants.ParamTransDate, income_date.Value.Date);
 
                         cmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Income added successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Income added successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
                     ResetFormState();
@@ -164,7 +157,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -172,47 +165,53 @@ namespace IncomeExpensesTrackingManagementSystem
         /// <summary>
         /// Handles the Delete button click to remove an income transaction.
         /// </summary>
-        private void Button2_Click(object sender, EventArgs e)
+        private void IncomeDeleteBtn_Click(object sender, EventArgs e)
         {
-            if (dataGridView1.SelectedRows.Count > 0)
+            if (income_dataGridView.SelectedRows.Count > 0)
             {
                 try
                 {
-                    object? transIdValue = dataGridView1.SelectedRows[0].Cells[0].Value;
+                    object? transIdValue = income_dataGridView.SelectedRows[0].Cells[0].Value;
                     if (transIdValue is null || transIdValue == DBNull.Value)
                     {
-                        MessageBox.Show("Please select a valid income record", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Please select a valid income record", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
                     int transId = Convert.ToInt32(transIdValue);
 
+                    if (MessageBox.Show(AppConstants.ConfirmDeleteTransaction, AppConstants.ConfirmationTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                    {
+                        return;
+                    }
+
                     using var connect = new SqlConnection(_connectionString);
                     connect.Open();
 
-                    using var cmd = new SqlCommand("DELETE FROM transactions WHERE trans_id = @trans_id", connect);
-                    cmd.Parameters.AddWithValue("@trans_id", transId);
+                    using var cmd = new SqlCommand("DELETE FROM transactions WHERE trans_id = @trans_id AND user_id = @user_id", connect);
+                    cmd.Parameters.AddWithValue(AppConstants.ParamTransactionId, transId);
+                    cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                     cmd.ExecuteNonQuery();
 
-                    MessageBox.Show("Income deleted successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(AppConstants.TransactionDeletedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ResetFormState();
                     LoadIncomeData();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                MessageBox.Show("Please select an income record to delete", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please select an income record to delete", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         /// <summary>
         /// Handles the Clear button click to reset the form.
         /// </summary>
-        private void Button3_Click(object sender, EventArgs e)
+        private void IncomeClearBtn_Click(object sender, EventArgs e)
         {
             ResetFormState();
         }
@@ -220,24 +219,29 @@ namespace IncomeExpensesTrackingManagementSystem
         /// <summary>
         /// Handles the Update button click.
         /// </summary>
-        private void Button1_Click(object sender, EventArgs e)
+        private void IncomeUpdateBtn_Click(object sender, EventArgs e)
         {
-            // Update is handled via the Add button when a record is selected
-            Category_AddBtn_Click(sender, e);
+            if (!_selectedTransactionId.HasValue)
+            {
+                MessageBox.Show("Please select an income record to update", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            IncomeAddBtn_Click(sender, e);
         }
 
         /// <summary>
         /// Handles DataGridView cell click to populate form with transaction details.
         /// </summary>
-        private void DataGridView1_CellClick(object? sender, DataGridViewCellEventArgs e)
+        private void IncomeDataGridView_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0 || e.RowIndex >= dataGridView1.Rows.Count)
+            if (e.RowIndex < 0 || e.RowIndex >= income_dataGridView.Rows.Count)
             {
                 return;
             }
 
-            DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
-            object? transId = row.Cells["trans_id"].Value;
+            DataGridViewRow row = income_dataGridView.Rows[e.RowIndex];
+            object? transId = row.Cells[AppConstants.ColumnTransactionId].Value;
             if (transId is null || transId == DBNull.Value)
             {
                 return;
@@ -245,26 +249,43 @@ namespace IncomeExpensesTrackingManagementSystem
 
             _selectedTransactionId = Convert.ToInt32(transId);
 
-            decimal amountValue = Convert.ToDecimal(row.Cells["trans_amount"].Value ?? 0m);
-            textBox2.Text = amountValue.ToString("N2", UsCulture);
-            textBox3.Text = Convert.ToString(row.Cells["trans_description"].Value) ?? string.Empty;
+            decimal amountValue = Convert.ToDecimal(row.Cells[AppConstants.ColumnAmount].Value ?? 0m);
+            income_amount.Text = amountValue.ToString("N2", UsCulture);
+
+            income_description.Text = Convert.ToString(row.Cells["trans_description"].Value) ?? string.Empty;
 
             if (DateTime.TryParse(Convert.ToString(row.Cells["trans_date"].Value), out DateTime selectedDate))
             {
-                dateTimePicker1.Value = selectedDate;
+                income_date.Value = selectedDate;
             }
 
-            int selectedCateId = Convert.ToInt32(row.Cells["cate_id"].Value ?? 0);
-            for (int i = 0; i < comboBox1.Items.Count; i++)
+            int selectedCateId = Convert.ToInt32(row.Cells[AppConstants.ColumnCategoryId].Value ?? 0);
+            for (int i = 0; i < income_category.Items.Count; i++)
             {
-                if (comboBox1.Items[i] is CategoryItem item && item.Id == selectedCateId)
+                if (income_category.Items[i] is CategoryItem item && item.Id == selectedCateId)
                 {
-                    comboBox1.SelectedIndex = i;
+                    income_category.SelectedIndex = i;
+                    income_item.Text = item.Name;
                     break;
                 }
             }
 
-            category_addBtn.Text = "Update";
+            income_addBtn.Text = "Update";
+        }
+
+        /// <summary>
+        /// Handles category selection change to update the item field.
+        /// </summary>
+        private void IncomeCategory_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (income_category.SelectedItem is CategoryItem selectedCategory)
+            {
+                income_item.Text = selectedCategory.Name;
+            }
+            else
+            {
+                income_item.Clear();
+            }
         }
 
         /// <summary>
@@ -273,36 +294,20 @@ namespace IncomeExpensesTrackingManagementSystem
         private void ResetFormState()
         {
             _selectedTransactionId = null;
-            textBox2.Clear();
-            textBox3.Clear();
-            comboBox1.SelectedIndex = -1;
-            dateTimePicker1.Value = DateTime.Now;
-            category_addBtn.Text = "Add";
+            income_item.Clear();
+            income_amount.Clear();
+            income_description.Clear();
+            income_category.SelectedIndex = -1;
+            income_date.Value = DateTime.Now;
+            income_addBtn.Text = "Add";
         }
 
+        /// <summary>
+        /// Handles the form Load event to initialize income data.
+        /// </summary>
         private void IncomeForm_Load(object sender, EventArgs e)
         {
             LoadIncomeData();
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void panel1_Paint(object sender, PaintEventArgs e)
-        {
-
         }
     }
 }

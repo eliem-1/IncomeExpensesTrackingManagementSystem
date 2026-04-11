@@ -117,6 +117,7 @@ namespace IncomeExpensesTrackingManagementSystem
                         MessageBox.Show("Login successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         MainForm mform = new();
+                        mform.SetUserId(userId, login_username.Text.Trim());
                         mform.Show();
 
                         this.Hide();

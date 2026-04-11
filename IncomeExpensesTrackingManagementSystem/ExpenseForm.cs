@@ -17,7 +17,6 @@ namespace IncomeExpensesTrackingManagementSystem
         {
             InitializeComponent();
             expense_dataGridView.CellClick += ExpenseDataGridView_CellClick;
-            LoadExpenseData();
         }
 
         public void SetUserId(int userId)
@@ -34,7 +33,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                using var cmd = new SqlCommand("SELECT cate_id, cate_name FROM category WHERE cate_type IN ('Expense', 'Expenses') AND cate_status = 'Active'", connect);
+                using var cmd = new SqlCommand(AppConstants.SelectExpenseCategories, connect);
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {
@@ -45,7 +44,7 @@ namespace IncomeExpensesTrackingManagementSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading categories: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.LoadingCategoriesError + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -58,8 +57,8 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                using var cmd = new SqlCommand("SELECT trans_id, cate_id, trans_description, trans_amount, trans_date FROM transactions WHERE user_id = @user_id AND trans_type = 'Expense' ORDER BY trans_date DESC", connect);
-                cmd.Parameters.AddWithValue("@user_id", _currentUserId);
+                using var cmd = new SqlCommand(AppConstants.SelectExpenseTransactions, connect);
+                cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
 
                 SqlDataAdapter adapter = new(cmd);
                 DataTable dt = new();
@@ -67,16 +66,22 @@ namespace IncomeExpensesTrackingManagementSystem
 
                 expense_dataGridView.DataSource = dt;
 
-                DataGridViewColumn? amountColumn = expense_dataGridView.Columns["trans_amount"];
+                DataGridViewColumn? amountColumn = expense_dataGridView.Columns[AppConstants.ColumnAmount];
                 if (amountColumn != null)
                 {
-                    amountColumn.DefaultCellStyle.Format = "C2";
+                    amountColumn.DefaultCellStyle.Format = AppConstants.CurrencyFormat;
                     amountColumn.DefaultCellStyle.FormatProvider = UsCulture;
+                }
+
+                DataGridViewColumn? dateColumn = expense_dataGridView.Columns["trans_date"];
+                if (dateColumn != null)
+                {
+                    dateColumn.DefaultCellStyle.Format = "MM-dd-yyyy";
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -84,11 +89,11 @@ namespace IncomeExpensesTrackingManagementSystem
         {
             if (string.IsNullOrWhiteSpace(expense_amount.Text) || expense_category.SelectedIndex == -1)
             {
-                MessageBox.Show("Please fill all required fields", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.FillAllFieldsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else if (!decimal.TryParse(expense_amount.Text, NumberStyles.Number | NumberStyles.AllowCurrencySymbol, UsCulture, out decimal amount) || amount <= 0)
             {
-                MessageBox.Show("Please enter a valid amount", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.InvalidAmountError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
@@ -96,7 +101,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 {
                     if (expense_category.SelectedItem is not CategoryItem selectedCategory)
                     {
-                        MessageBox.Show("Please select a valid category", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(AppConstants.SelectValidCategoryError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -107,31 +112,29 @@ namespace IncomeExpensesTrackingManagementSystem
                     {
                         string updateQuery = "UPDATE transactions SET cate_id = @cate_id, trans_amount = @trans_amount, trans_description = @trans_description, trans_date = @trans_date WHERE trans_id = @trans_id AND user_id = @user_id AND trans_type = 'Expense'";
                         using var updateCmd = new SqlCommand(updateQuery, connect);
-                        updateCmd.Parameters.AddWithValue("@cate_id", selectedCategory.Id);
-                        updateCmd.Parameters.AddWithValue("@trans_amount", amount);
-                        updateCmd.Parameters.AddWithValue("@trans_description", expense_description.Text.Trim());
-                        updateCmd.Parameters.AddWithValue("@trans_date", expense_date.Value.Date);
-                        updateCmd.Parameters.AddWithValue("@trans_id", _selectedTransactionId.Value);
-                        updateCmd.Parameters.AddWithValue("@user_id", _currentUserId);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamCategoryId, selectedCategory.Id);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamAmount, amount);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamDescription, expense_description.Text.Trim());
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamTransDate, expense_date.Value.Date);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamTransactionId, _selectedTransactionId.Value);
+                        updateCmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                         updateCmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Expense updated successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Expense updated successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
-                        string insertQuery = "INSERT INTO transactions (user_id, cate_id, trans_type, trans_amount, trans_description, trans_date) VALUES (@user_id, @cate_id, @trans_type, @trans_amount, @trans_description, @trans_date)";
-
-                        using var cmd = new SqlCommand(insertQuery, connect);
-                        cmd.Parameters.AddWithValue("@user_id", _currentUserId);
-                        cmd.Parameters.AddWithValue("@cate_id", selectedCategory.Id);
-                        cmd.Parameters.AddWithValue("@trans_type", "Expense");
-                        cmd.Parameters.AddWithValue("@trans_amount", amount);
-                        cmd.Parameters.AddWithValue("@trans_description", expense_description.Text.Trim());
-                        cmd.Parameters.AddWithValue("@trans_date", expense_date.Value.Date);
+                        using var cmd = new SqlCommand(AppConstants.InsertTransaction, connect);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamCategoryId, selectedCategory.Id);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamTransactionType, AppConstants.TransactionTypeExpense);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamAmount, amount);
+                        cmd.Parameters.AddWithValue(AppConstants.ParamDescription, expense_description.Text.Trim());
+                        cmd.Parameters.AddWithValue(AppConstants.ParamTransDate, expense_date.Value.Date);
 
                         cmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Expense added successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("Expense added successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
                     ResetFormState();
@@ -140,7 +143,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -154,37 +157,54 @@ namespace IncomeExpensesTrackingManagementSystem
                     object? transIdValue = expense_dataGridView.SelectedRows[0].Cells[0].Value;
                     if (transIdValue is null || transIdValue == DBNull.Value)
                     {
-                        MessageBox.Show("Please select a valid expense record", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Please select a valid expense record", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
                     int transId = Convert.ToInt32(transIdValue);
 
+                    if (MessageBox.Show(AppConstants.ConfirmDeleteTransaction, AppConstants.ConfirmationTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                    {
+                        return;
+                    }
+
                     using var connect = new SqlConnection(_connectionString);
                     connect.Open();
 
-                    using var cmd = new SqlCommand("DELETE FROM transactions WHERE trans_id = @trans_id", connect);
-                    cmd.Parameters.AddWithValue("@trans_id", transId);
+                    using var cmd = new SqlCommand("DELETE FROM transactions WHERE trans_id = @trans_id AND user_id = @user_id", connect);
+                    cmd.Parameters.AddWithValue(AppConstants.ParamTransactionId, transId);
+                    cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                     cmd.ExecuteNonQuery();
 
-                    MessageBox.Show("Expense deleted successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(AppConstants.TransactionDeletedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ResetFormState();
                     LoadExpenseData();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                MessageBox.Show("Please select an expense record to delete", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Please select an expense record to delete", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private void ExpenseClearBtn_Click(object sender, EventArgs e)
         {
             ResetFormState();
+        }
+
+        private void ExpenseUpdateBtn_Click(object sender, EventArgs e)
+        {
+            if (!_selectedTransactionId.HasValue)
+            {
+                MessageBox.Show("Please select an expense record to update", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            ExpenseAddBtn_Click(sender, e);
         }
 
         private void ExpenseDataGridView_CellClick(object? sender, DataGridViewCellEventArgs e)
@@ -195,7 +215,7 @@ namespace IncomeExpensesTrackingManagementSystem
             }
 
             DataGridViewRow row = expense_dataGridView.Rows[e.RowIndex];
-            object? transId = row.Cells["trans_id"].Value;
+            object? transId = row.Cells[AppConstants.ColumnTransactionId].Value;
             if (transId is null || transId == DBNull.Value)
             {
                 return;
@@ -203,7 +223,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
             _selectedTransactionId = Convert.ToInt32(transId);
 
-            decimal amountValue = Convert.ToDecimal(row.Cells["trans_amount"].Value ?? 0m);
+            decimal amountValue = Convert.ToDecimal(row.Cells[AppConstants.ColumnAmount].Value ?? 0m);
             expense_amount.Text = amountValue.ToString("N2", UsCulture);
             expense_description.Text = Convert.ToString(row.Cells["trans_description"].Value) ?? string.Empty;
 
@@ -212,7 +232,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 expense_date.Value = selectedDate;
             }
 
-            int selectedCateId = Convert.ToInt32(row.Cells["cate_id"].Value ?? 0);
+            int selectedCateId = Convert.ToInt32(row.Cells[AppConstants.ColumnCategoryId].Value ?? 0);
             for (int i = 0; i < expense_category.Items.Count; i++)
             {
                 if (expense_category.Items[i] is CategoryItem item && item.Id == selectedCateId)

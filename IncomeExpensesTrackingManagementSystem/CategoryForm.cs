@@ -10,7 +10,7 @@ namespace IncomeExpensesTrackingManagementSystem
         public CategoryForm()
         {
             InitializeComponent();
-            dataGridView1.CellClick += DataGridView1_CellClick;
+            category_dataGridView.CellClick += CategoryDataGridView_CellClick;
             LoadCategories();
         }
 
@@ -29,12 +29,12 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void DisplayCategoryList(List<CategoryData> categories)
         {
-            dataGridView1.DataSource = categories;
+            category_dataGridView.DataSource = categories;
         }
 
         private void clearFields()
         {
-            category_category.Clear();
+            category_name.Clear();
             category_type.SelectedIndex = -1;
             category_status.SelectedIndex = -1;
             getId = 0;
@@ -42,7 +42,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void CategoryAddBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(category_category.Text) || category_type.SelectedIndex == -1 || category_status.SelectedIndex == -1)
+            if (string.IsNullOrWhiteSpace(category_name.Text) || category_type.SelectedIndex == -1 || category_status.SelectedIndex == -1)
             {
                 MessageBox.Show("Please fill all blank fields", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -50,7 +50,7 @@ namespace IncomeExpensesTrackingManagementSystem
             {
                 try
                 {
-                    string categoryName = category_category.Text.Trim();
+                    string categoryName = category_name.Text.Trim();
                     string categoryType = category_type.SelectedItem?.ToString() ?? string.Empty;
                     string categoryStatus = category_status.SelectedItem?.ToString() ?? string.Empty;
 
@@ -75,7 +75,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void CategoryUpdateBtn_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(category_category.Text) || category_type.SelectedIndex == -1 || category_status.SelectedIndex == -1)
+            if (string.IsNullOrWhiteSpace(category_name.Text) || category_type.SelectedIndex == -1 || category_status.SelectedIndex == -1)
             {
                 MessageBox.Show("Please select item first", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -85,16 +85,16 @@ namespace IncomeExpensesTrackingManagementSystem
                 {
                     try
                     {
-                        using (SqlConnection connect = new SqlConnection(DatabaseSetup.ConnectionString))
+                        using (SqlConnection connect = new(DatabaseSetup.ConnectionString))
                         {
                             connect.Open();
 
                             string updateData = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id";
 
-                            using (SqlCommand cmd = new SqlCommand(updateData, connect))
+                            using (SqlCommand cmd = new(updateData, connect))
                             {
                                 cmd.Parameters.AddWithValue("@cate_id", getId);
-                                cmd.Parameters.AddWithValue("@cate_name", category_category.Text.Trim());
+                                cmd.Parameters.AddWithValue("@cate_name", category_name.Text.Trim());
                                 cmd.Parameters.AddWithValue("@cate_type", category_type.SelectedItem);
                                 cmd.Parameters.AddWithValue("@cate_status", category_status.SelectedItem);
 
@@ -153,16 +153,16 @@ namespace IncomeExpensesTrackingManagementSystem
             }
         }
 
-        private void DataGridView1_CellClick(object? sender, DataGridViewCellEventArgs e)
+        private void CategoryDataGridView_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex != -1)
             {
-                DataGridViewRow row = dataGridView1.Rows[e.RowIndex];
+                DataGridViewRow row = category_dataGridView.Rows[e.RowIndex];
 
                 if (row.Cells[0].Value != null && row.Cells[1].Value != null && row.Cells[2].Value != null && row.Cells[3].Value != null)
                 {
                     getId = Convert.ToInt32(row.Cells[0].Value);
-                    category_category.Text = row.Cells[1].Value?.ToString() ?? string.Empty;
+                    category_name.Text = row.Cells[1].Value?.ToString() ?? string.Empty;
                     category_type.SelectedItem = row.Cells[2].Value?.ToString() ?? string.Empty;
                     category_status.SelectedItem = row.Cells[3].Value?.ToString() ?? string.Empty;
                 }

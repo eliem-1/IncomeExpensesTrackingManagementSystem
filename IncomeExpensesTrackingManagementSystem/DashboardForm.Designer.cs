@@ -64,6 +64,9 @@
             label22 = new Label();
             panel14 = new Panel();
             label24 = new Label();
+            panel15 = new Panel();
+            label25 = new Label();
+            label26 = new Label();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             panel3.SuspendLayout();
@@ -78,6 +81,7 @@
             panel12.SuspendLayout();
             panel13.SuspendLayout();
             panel14.SuspendLayout();
+            panel15.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
@@ -465,10 +469,42 @@
             label24.TabIndex = 5;
             label24.Text = "0";
             // 
+            // panel15
+            // 
+            panel15.BackColor = Color.White;
+            panel15.Controls.Add(label26);
+            panel15.Controls.Add(label25);
+            panel15.Location = new Point(48, 622);
+            panel15.Name = "panel15";
+            panel15.Size = new Size(1338, 75);
+            panel15.TabIndex = 4;
+            // 
+            // label25
+            // 
+            label25.AutoSize = true;
+            label25.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label25.Location = new Point(28, 25);
+            label25.Name = "label25";
+            label25.Size = new Size(125, 25);
+            label25.TabIndex = 5;
+            label25.Text = "Total Balance";
+            // 
+            // label26
+            // 
+            label26.AutoSize = true;
+            label26.Font = new Font("Microsoft Sans Serif", 14F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label26.ForeColor = Color.Green;
+            label26.Location = new Point(200, 22);
+            label26.Name = "label26";
+            label26.Size = new Size(24, 29);
+            label26.TabIndex = 6;
+            label26.Text = "0";
+            // 
             // DashboardForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(panel15);
             Controls.Add(panel12);
             Controls.Add(panel11);
             Controls.Add(panel6);
@@ -503,6 +539,8 @@
             panel13.PerformLayout();
             panel14.ResumeLayout(false);
             panel14.PerformLayout();
+            panel15.ResumeLayout(false);
+            panel15.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -544,5 +582,8 @@
         private Label label22;
         private Panel panel14;
         private Label label24;
+        private Panel panel15;
+        private Label label25;
+        private Label label26;
     }
 }

@@ -38,14 +38,14 @@
             label3 = new Label();
             category_type = new ComboBox();
             label2 = new Label();
-            category_category = new TextBox();
+            category_name = new TextBox();
             label1 = new Label();
             panel2 = new Panel();
             label4 = new Label();
-            dataGridView1 = new DataGridView();
+            category_dataGridView = new DataGridView();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)category_dataGridView).BeginInit();
             SuspendLayout();
             // 
             // panel1
@@ -59,7 +59,7 @@
             panel1.Controls.Add(label3);
             panel1.Controls.Add(category_type);
             panel1.Controls.Add(label2);
-            panel1.Controls.Add(category_category);
+            panel1.Controls.Add(category_name);
             panel1.Controls.Add(label1);
             panel1.Location = new Point(19, 35);
             panel1.Name = "panel1";
@@ -168,13 +168,13 @@
             label2.TabIndex = 2;
             label2.Text = "Type";
             // 
-            // category_category
+            // category_name
             // 
-            category_category.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            category_category.Location = new Point(16, 55);
-            category_category.Name = "category_category";
-            category_category.Size = new Size(335, 30);
-            category_category.TabIndex = 1;
+            category_name.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            category_name.Location = new Point(16, 55);
+            category_name.Name = "category_name";
+            category_name.Size = new Size(335, 30);
+            category_name.TabIndex = 1;
             // 
             // label1
             // 
@@ -190,7 +190,7 @@
             // 
             panel2.BackColor = Color.White;
             panel2.Controls.Add(label4);
-            panel2.Controls.Add(dataGridView1);
+            panel2.Controls.Add(category_dataGridView);
             panel2.Location = new Point(422, 35);
             panel2.Name = "panel2";
             panel2.Size = new Size(987, 552);
@@ -206,12 +206,12 @@
             label4.TabIndex = 1;
             label4.Text = "Category List";
             // 
-            // dataGridView1
+            // category_dataGridView
             // 
-            dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.AllowUserToDeleteRows = false;
-            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dataGridView1.BorderStyle = BorderStyle.None;
+            category_dataGridView.AllowUserToAddRows = false;
+            category_dataGridView.AllowUserToDeleteRows = false;
+            category_dataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            category_dataGridView.BorderStyle = BorderStyle.None;
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = Color.Green;
             dataGridViewCellStyle1.Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -219,16 +219,16 @@
             dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.EnableHeadersVisualStyles = false;
-            dataGridView1.Location = new Point(3, 55);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.ReadOnly = true;
-            dataGridView1.RowHeadersVisible = false;
-            dataGridView1.RowHeadersWidth = 51;
-            dataGridView1.Size = new Size(947, 483);
-            dataGridView1.TabIndex = 0;
+            category_dataGridView.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            category_dataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            category_dataGridView.EnableHeadersVisualStyles = false;
+            category_dataGridView.Location = new Point(3, 55);
+            category_dataGridView.Name = "category_dataGridView";
+            category_dataGridView.ReadOnly = true;
+            category_dataGridView.RowHeadersVisible = false;
+            category_dataGridView.RowHeadersWidth = 51;
+            category_dataGridView.Size = new Size(947, 483);
+            category_dataGridView.TabIndex = 0;
             // 
             // CategoryForm
             // 
@@ -242,7 +242,7 @@
             panel1.PerformLayout();
             panel2.ResumeLayout(false);
             panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)category_dataGridView).EndInit();
             ResumeLayout(false);
         }
 
@@ -250,7 +250,7 @@
 
         private Panel panel1;
         private Label label2;
-        private TextBox category_category;
+        private TextBox category_name;
         private Label label1;
         private Panel panel2;
         private ComboBox category_type;
@@ -261,6 +261,6 @@
         private Button category_deleteBtn;
         private Button category_updateBtn;
         private Label label4;
-        private DataGridView dataGridView1;
+        private DataGridView category_dataGridView;
     }
 }
