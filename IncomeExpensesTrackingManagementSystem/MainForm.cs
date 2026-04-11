@@ -51,7 +51,8 @@ namespace IncomeExpensesTrackingManagementSystem
                 expenseForm1?.SetUserId(_currentUserId);
                 expenseForm1?.LoadExpenseData();
 
-                // Initialize Categories (already loads all categories)
+                // Initialize Categories with user data
+                categoryForm1?.SetUserId(_currentUserId);
                 categoryForm1?.LoadCategories();
 
                 // Display Dashboard as default

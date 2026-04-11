@@ -90,10 +90,12 @@ namespace IncomeExpensesTrackingManagementSystem
                         BEGIN
                             CREATE TABLE category (
                                 cate_id INT PRIMARY KEY IDENTITY(1,1),
+                                user_id INT NULL,
                                 cate_name VARCHAR(MAX) NULL,
                                 cate_type VARCHAR(MAX) NULL,
                                 cate_status VARCHAR(MAX) NULL,
-                                cate_date DATE NULL DEFAULT CAST(GETDATE() AS DATE)
+                                cate_date DATE NULL DEFAULT CAST(GETDATE() AS DATE),
+                                FOREIGN KEY (user_id) REFERENCES users(id)
                             );
                         END
                         ELSE IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'category' AND COLUMN_NAME = 'cate_date')
@@ -102,6 +104,18 @@ namespace IncomeExpensesTrackingManagementSystem
                         END";
 
                     using (SqlCommand cmd = new SqlCommand(createCategoryTableQuery, connection))
+                    {
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    // Add user_id column to category table if it doesn't exist
+                    string addUserIdToCategoryQuery = @"
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'category' AND COLUMN_NAME = 'user_id')
+                        BEGIN
+                            ALTER TABLE category ADD user_id INT NULL;
+                        END";
+
+                    using (SqlCommand cmd = new SqlCommand(addUserIdToCategoryQuery, connection))
                     {
                         cmd.ExecuteNonQuery();
                     }

@@ -42,7 +42,7 @@ namespace IncomeExpensesTrackingManagementSystem
         /// </summary>
         /// <returns>A list of <see cref="CategoryData"/> objects representing all categories in the database.</returns>
         /// <exception cref="Exception">Thrown when a database error occurs during retrieval.</exception>
-        public List<CategoryData> GetCategoryList()
+        public List<CategoryData> GetCategoryList(int userId)
         {
             var listData = new List<CategoryData>();
 
@@ -51,7 +51,8 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                using var cmd = new SqlCommand("SELECT * FROM category", connect);
+                using var cmd = new SqlCommand("SELECT * FROM category WHERE user_id = @user_id", connect);
+                cmd.Parameters.AddWithValue("@user_id", userId);
                 using var reader = cmd.ExecuteReader();
 
                 while (reader.Read())
@@ -99,17 +100,20 @@ namespace IncomeExpensesTrackingManagementSystem
         /// <returns>True if the category was successfully added; otherwise, false.</returns>
         /// <exception cref="ArgumentException">Thrown when any parameter is null, empty, or whitespace.</exception>
         /// <exception cref="Exception">Thrown when a database error occurs during insertion.</exception>
-        public bool AddCategory(string name, string type, string status)
+        public bool AddCategory(int userId, string name, string type, string status)
         {
+            if (userId <= 0)
+                throw new ArgumentException("Invalid user ID.");
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(type) || string.IsNullOrWhiteSpace(status))
                 throw new ArgumentException("Name, type, and status cannot be null or empty.");
 
             try
             {
-                string insertQuery = "INSERT INTO category (cate_name, cate_type, cate_status) VALUES (@cate_name, @cate_type, @cate_status)";
+                string insertQuery = "INSERT INTO category (user_id, cate_name, cate_type, cate_status) VALUES (@user_id, @cate_name, @cate_type, @cate_status)";
 
                 var parameters = new Dictionary<string, object>
                 {
+                    { "@user_id", userId },
                     { "@cate_name", name.Trim() },
                     { "@cate_type", type.Trim() },
                     { "@cate_status", status.Trim() }
@@ -133,8 +137,10 @@ namespace IncomeExpensesTrackingManagementSystem
         /// <returns>True if the category was successfully updated; otherwise, false.</returns>
         /// <exception cref="ArgumentException">Thrown when ID is not positive or any other parameter is null, empty, or whitespace.</exception>
         /// <exception cref="Exception">Thrown when a database error occurs during update.</exception>
-        public bool UpdateCategory(int id, string name, string type, string status)
+        public bool UpdateCategory(int userId, int id, string name, string type, string status)
         {
+            if (userId <= 0)
+                throw new ArgumentException("Invalid user ID.");
             if (id <= 0)
                 throw new ArgumentException("Category ID must be greater than 0.");
             if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(type) || string.IsNullOrWhiteSpace(status))
@@ -142,10 +148,11 @@ namespace IncomeExpensesTrackingManagementSystem
 
             try
             {
-                string updateQuery = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id";
+                string updateQuery = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id AND user_id = @user_id";
 
                 var parameters = new Dictionary<string, object>
                 {
+                    { "@user_id", userId },
                     { "@cate_id", id },
                     { "@cate_name", name.Trim() },
                     { "@cate_type", type.Trim() },
@@ -167,17 +174,20 @@ namespace IncomeExpensesTrackingManagementSystem
         /// <returns>True if the category was successfully deleted; otherwise, false.</returns>
         /// <exception cref="ArgumentException">Thrown when ID is not positive.</exception>
         /// <exception cref="Exception">Thrown when a database error occurs during deletion.</exception>
-        public bool DeleteCategory(int id)
+        public bool DeleteCategory(int userId, int id)
         {
+            if (userId <= 0)
+                throw new ArgumentException("Invalid user ID.");
             if (id <= 0)
                 throw new ArgumentException("Category ID must be greater than 0.");
 
             try
             {
-                string deleteQuery = "DELETE FROM category WHERE cate_id = @cate_id";
+                string deleteQuery = "DELETE FROM category WHERE cate_id = @cate_id AND user_id = @user_id";
 
                 var parameters = new Dictionary<string, object>
                 {
+                    { "@user_id", userId },
                     { "@cate_id", id }
                 };
 

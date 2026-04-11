@@ -82,7 +82,8 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                using var cmd = new SqlCommand("SELECT cate_id, cate_name FROM category WHERE cate_type IN ('Income', 'Incomes') AND cate_status = 'Active'", connect);
+                using var cmd = new SqlCommand("SELECT cate_id, cate_name FROM category WHERE user_id = @user_id AND cate_type IN ('Income', 'Incomes') AND cate_status = 'Active'", connect);
+                cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {

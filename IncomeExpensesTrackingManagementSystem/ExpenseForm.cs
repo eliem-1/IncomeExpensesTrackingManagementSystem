@@ -34,6 +34,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 connect.Open();
 
                 using var cmd = new SqlCommand(AppConstants.SelectExpenseCategories, connect);
+                cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())
                 {

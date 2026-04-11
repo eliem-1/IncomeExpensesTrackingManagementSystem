@@ -75,10 +75,12 @@ CREATE TABLE users (
 ```sql
 CREATE TABLE category (
     cate_id INT PRIMARY KEY IDENTITY(1,1),
+    user_id INT NULL,                   -- Owner of the category
     cate_name VARCHAR(MAX) NULL,
     cate_type VARCHAR(MAX) NULL,        -- 'Income' or 'Expense'
     cate_status VARCHAR(MAX) NULL,      -- 'Active' or 'Inactive'
-    cate_date DATE NULL DEFAULT GETDATE()
+    cate_date DATE NULL DEFAULT GETDATE(),
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 ```
 
@@ -119,6 +121,7 @@ CREATE TABLE transactions (
 - ✅ Mark categories as Active/Inactive
 - ✅ Automatic creation date tracking
 - ✅ Category assignment to transactions
+- ✅ User-specific categories (each user manages their own)
 
 ### Financial Dashboard
 - ✅ Total income calculation
@@ -154,17 +157,17 @@ CREATE TABLE transactions (
 
 ### CategoryData.cs
 ```csharp
-// Retrieves all categories
-List<CategoryData> GetCategoryList()
+// Retrieves all categories for a user
+List<CategoryData> GetCategoryList(int userId)
 
-// Adds a new category
-bool AddCategory(string name, string type, string status)
+// Adds a new category for a user
+bool AddCategory(int userId, string name, string type, string status)
 
-// Updates an existing category
-bool UpdateCategory(int id, string name, string type, string status)
+// Updates an existing category (user-scoped)
+bool UpdateCategory(int userId, int id, string name, string type, string status)
 
-// Deletes a category
-bool DeleteCategory(int id)
+// Deletes a category (user-scoped)
+bool DeleteCategory(int userId, int id)
 ```
 
 ### IncomeData.cs
@@ -229,7 +232,8 @@ dashboardForm.LoadDashboardData();  // Calculates and displays totals
 
 ### CategoryForm - Browse Categories
 ```csharp
-categoryForm.LoadCategories();  // Displays all active categories
+categoryForm.SetUserId(userId);   // Set user context
+categoryForm.LoadCategories();    // Displays user's categories
 ```
 
 ---
@@ -237,14 +241,19 @@ categoryForm.LoadCategories();  // Displays all active categories
 ## 📊 Recent Improvements
 
 ### Latest Session (Current)
+✅ **User Data Isolation** - Categories now scoped per user (user_id added to category table)
+✅ Updated **CategoryData.cs** - All methods accept userId for user-specific queries
+✅ Updated **CategoryForm.cs** - Added SetUserId() method for user context
+✅ Updated **IncomeForm.cs** & **ExpenseForm.cs** - Category loading filtered by user
+✅ Updated **DatabaseSetup.cs** - Migration to add user_id column to existing databases
+✅ Added **Dashboard Total Balance** - Net balance with color-coded display
+✅ Fixed date formatting on DateTimePicker controls
+
+### Previous Improvements
 ✅ Created **IncomeData.cs** - Comprehensive data layer for income transactions
 ✅ Created **ExpenseData.cs** - Comprehensive data layer for expense transactions
 ✅ Enhanced **IncomeForm.cs** - Added SetUserId() and LoadIncomeData() methods
 ✅ Improved **MainForm.cs** - Added SetUserId() and InitializeUserForms() methods
-✅ Added XML documentation to all new classes and methods
-✅ Implemented consistent formatting and security practices
-
-### Previous Improvements
 ✅ Added category date tracking (cate_date column)
 ✅ Refactored CategoryData.cs with helper methods
 ✅ Applied DRY principles to eliminate code duplication

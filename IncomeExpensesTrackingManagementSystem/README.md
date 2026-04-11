@@ -8,6 +8,7 @@ A Windows Forms application built with C# and .NET 10 for tracking personal inco
 - **Income Tracking**: Record and manage income transactions
 - **Expense Tracking**: Record and manage expense transactions
 - **Category Management**: Create and manage transaction categories
+- **User Data Isolation**: Each user has their own categories, income, and expenses
 - **Dashboard**: View financial summary including total income, expenses, and balance
 - **Secure Database**: Uses SQL Server LocalDB for data persistence
 
@@ -72,6 +73,7 @@ IncomeExpensesTrackingManagementSystem/
 ### Category Table
 ```sql
 - cate_id (INT PRIMARY KEY IDENTITY)
+- user_id (INT FOREIGN KEY) - Owner of the category
 - cate_name (VARCHAR MAX)
 - cate_type (VARCHAR MAX) - Income or Expenses
 - cate_status (VARCHAR MAX) - Active or Inactive
@@ -92,6 +94,7 @@ IncomeExpensesTrackingManagementSystem/
 
 - **Password Hashing**: PBKDF2 with SHA-256, 100,000 iterations
 - **Automatic Password Upgrade**: Legacy plain-text passwords are automatically hashed on login
+- **User Data Isolation**: Categories, income, and expenses are scoped per user
 - **SQL Parameterization**: All database queries use parameterized commands to prevent SQL injection
 - **Connection Security**: Integrated Windows authentication for database access
 
@@ -133,6 +136,6 @@ For issues or questions, please create an issue on the GitHub repository.
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2024  
+**Version**: 1.1.0  
+**Last Updated**: 2025  
 **Author**: Development Team

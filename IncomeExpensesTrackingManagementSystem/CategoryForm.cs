@@ -6,19 +6,24 @@ namespace IncomeExpensesTrackingManagementSystem
     {
         private readonly CategoryData _categoryData = new();
         private int getId = 0;
+        private int _currentUserId;
 
         public CategoryForm()
         {
             InitializeComponent();
             category_dataGridView.CellClick += CategoryDataGridView_CellClick;
-            LoadCategories();
+        }
+
+        public void SetUserId(int userId)
+        {
+            _currentUserId = userId;
         }
 
         public void LoadCategories()
         {
             try
             {
-                List<CategoryData> categories = _categoryData.GetCategoryList();
+                List<CategoryData> categories = _categoryData.GetCategoryList(_currentUserId);
                 DisplayCategoryList(categories);
             }
             catch (Exception ex)
@@ -54,7 +59,7 @@ namespace IncomeExpensesTrackingManagementSystem
                     string categoryType = category_type.SelectedItem?.ToString() ?? string.Empty;
                     string categoryStatus = category_status.SelectedItem?.ToString() ?? string.Empty;
 
-                    if (_categoryData.AddCategory(categoryName, categoryType, categoryStatus))
+                    if (_categoryData.AddCategory(_currentUserId, categoryName, categoryType, categoryStatus))
                     {
                         MessageBox.Show("Category added successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -89,11 +94,12 @@ namespace IncomeExpensesTrackingManagementSystem
                         {
                             connect.Open();
 
-                            string updateData = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id";
+                            string updateData = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id AND user_id = @user_id";
 
                             using (SqlCommand cmd = new(updateData, connect))
                             {
                                 cmd.Parameters.AddWithValue("@cate_id", getId);
+                                cmd.Parameters.AddWithValue("@user_id", _currentUserId);
                                 cmd.Parameters.AddWithValue("@cate_name", category_name.Text.Trim());
                                 cmd.Parameters.AddWithValue("@cate_type", category_type.SelectedItem);
                                 cmd.Parameters.AddWithValue("@cate_status", category_status.SelectedItem);
@@ -131,7 +137,7 @@ namespace IncomeExpensesTrackingManagementSystem
             {
                 try
                 {
-                    if (_categoryData.DeleteCategory(getId))
+                    if (_categoryData.DeleteCategory(_currentUserId, getId))
                     {
                         MessageBox.Show("Category deleted successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         clearFields();
