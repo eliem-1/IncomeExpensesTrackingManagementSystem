@@ -72,7 +72,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 amountColumn?.DefaultCellStyle.FormatProvider = UsCulture;
 
                 DataGridViewColumn? dateColumn = expense_dataGridView.Columns["trans_date"];
-                dateColumn?.DefaultCellStyle.Format = "MM-dd-yyyy";
+                dateColumn?.DefaultCellStyle.Format = AppConstants.DateFormat;
             }
             catch (Exception ex)
             {
@@ -105,8 +105,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
                     if (_selectedTransactionId.HasValue)
                     {
-                        string updateQuery = "UPDATE transactions SET cate_id = @cate_id, trans_amount = @trans_amount, trans_description = @trans_description, trans_date = @trans_date WHERE trans_id = @trans_id AND user_id = @user_id AND trans_type = 'Expense'";
-                        using var updateCmd = new SqlCommand(updateQuery, connect);
+                        using var updateCmd = new SqlCommand(AppConstants.UpdateExpenseTransaction, connect);
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamCategoryId, selectedCategory.Id);
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamAmount, amount);
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamDescription, expense_description.Text.Trim());
@@ -115,7 +114,7 @@ namespace IncomeExpensesTrackingManagementSystem
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                         updateCmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Expense updated successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(AppConstants.ExpenseUpdatedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -129,7 +128,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
                         cmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Expense added successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(AppConstants.ExpenseAddedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
                     ResetFormState();
@@ -152,7 +151,7 @@ namespace IncomeExpensesTrackingManagementSystem
                     object? transIdValue = expense_dataGridView.SelectedRows[0].Cells[0].Value;
                     if (transIdValue is null || transIdValue == DBNull.Value)
                     {
-                        MessageBox.Show("Please select a valid expense record", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(AppConstants.SelectValidExpenseRecordError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -166,7 +165,7 @@ namespace IncomeExpensesTrackingManagementSystem
                     using var connect = new SqlConnection(_connectionString);
                     connect.Open();
 
-                    using var cmd = new SqlCommand("DELETE FROM transactions WHERE trans_id = @trans_id AND user_id = @user_id", connect);
+                    using var cmd = new SqlCommand(AppConstants.DeleteTransaction, connect);
                     cmd.Parameters.AddWithValue(AppConstants.ParamTransactionId, transId);
                     cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                     cmd.ExecuteNonQuery();
@@ -182,7 +181,7 @@ namespace IncomeExpensesTrackingManagementSystem
             }
             else
             {
-                MessageBox.Show("Please select an expense record to delete", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.SelectExpenseToDeleteError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -195,7 +194,7 @@ namespace IncomeExpensesTrackingManagementSystem
         {
             if (!_selectedTransactionId.HasValue)
             {
-                MessageBox.Show("Please select an expense record to update", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.SelectExpenseToUpdateError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -252,7 +251,8 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void ExpenseForm_Load(object sender, EventArgs e)
         {
-            LoadExpenseData();
+            if (_currentUserId > 0)
+                LoadExpenseData();
         }
     }
 }

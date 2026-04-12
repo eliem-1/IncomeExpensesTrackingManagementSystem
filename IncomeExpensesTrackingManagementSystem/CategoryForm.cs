@@ -1,11 +1,9 @@
-﻿using System.Data.SqlClient;
-
-namespace IncomeExpensesTrackingManagementSystem
+﻿namespace IncomeExpensesTrackingManagementSystem
 {
     public partial class CategoryForm : UserControl
     {
         private readonly CategoryData _categoryData = new();
-        private int getId = 0;
+        private int _selectedCategoryId;
         private int _currentUserId;
 
         public CategoryForm()
@@ -28,7 +26,7 @@ namespace IncomeExpensesTrackingManagementSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -37,19 +35,19 @@ namespace IncomeExpensesTrackingManagementSystem
             category_dataGridView.DataSource = categories;
         }
 
-        private void clearFields()
+        private void ClearFields()
         {
             category_name.Clear();
             category_type.SelectedIndex = -1;
             category_status.SelectedIndex = -1;
-            getId = 0;
+            _selectedCategoryId = 0;
         }
 
         private void CategoryAddBtn_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(category_name.Text) || category_type.SelectedIndex == -1 || category_status.SelectedIndex == -1)
             {
-                MessageBox.Show("Please fill all blank fields", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.FillAllFieldsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
@@ -61,19 +59,19 @@ namespace IncomeExpensesTrackingManagementSystem
 
                     if (_categoryData.AddCategory(_currentUserId, categoryName, categoryType, categoryStatus))
                     {
-                        MessageBox.Show("Category added successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(AppConstants.CategoryAddedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                        clearFields();
+                        ClearFields();
                         LoadCategories();
                     }
                     else
                     {
-                        MessageBox.Show("Failed to add category", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(AppConstants.CategoryAddFailedError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -82,40 +80,33 @@ namespace IncomeExpensesTrackingManagementSystem
         {
             if (string.IsNullOrWhiteSpace(category_name.Text) || category_type.SelectedIndex == -1 || category_status.SelectedIndex == -1)
             {
-                MessageBox.Show("Please select item first", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.SelectCategoryError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
-                if (MessageBox.Show("Are you sure you want to Update ID: " + getId + "?", "Confirmation Message", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show(AppConstants.ConfirmUpdateCategory, AppConstants.ConfirmationTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     try
                     {
-                        using (SqlConnection connect = new(DatabaseSetup.ConnectionString))
+                        string categoryName = category_name.Text.Trim();
+                        string categoryType = category_type.SelectedItem?.ToString() ?? string.Empty;
+                        string categoryStatus = category_status.SelectedItem?.ToString() ?? string.Empty;
+
+                        if (_categoryData.UpdateCategory(_currentUserId, _selectedCategoryId, categoryName, categoryType, categoryStatus))
                         {
-                            connect.Open();
+                            MessageBox.Show(AppConstants.CategoryUpdatedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                            string updateData = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id AND user_id = @user_id";
-
-                            using (SqlCommand cmd = new(updateData, connect))
-                            {
-                                cmd.Parameters.AddWithValue("@cate_id", getId);
-                                cmd.Parameters.AddWithValue("@user_id", _currentUserId);
-                                cmd.Parameters.AddWithValue("@cate_name", category_name.Text.Trim());
-                                cmd.Parameters.AddWithValue("@cate_type", category_type.SelectedItem);
-                                cmd.Parameters.AddWithValue("@cate_status", category_status.SelectedItem);
-
-                                cmd.ExecuteNonQuery();
-                            }
-
-                            MessageBox.Show("Updated successfully", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                            clearFields();
+                            ClearFields();
                             LoadCategories();
+                        }
+                        else
+                        {
+                            MessageBox.Show(AppConstants.CategoryUpdateFailedError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -123,7 +114,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void CategoryClearBtn_Click(object sender, EventArgs e)
         {
-            clearFields();
+            ClearFields();
         }
 
         private void CategoryRefreshBtn_Click(object sender, EventArgs e)
@@ -133,29 +124,34 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void CategoryDeleteBtn_Click(object sender, EventArgs e)
         {
-            if (getId > 0)
+            if (_selectedCategoryId > 0)
             {
+                if (MessageBox.Show(AppConstants.ConfirmDeleteCategory, AppConstants.ConfirmationTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                {
+                    return;
+                }
+
                 try
                 {
-                    if (_categoryData.DeleteCategory(_currentUserId, getId))
+                    if (_categoryData.DeleteCategory(_currentUserId, _selectedCategoryId))
                     {
-                        MessageBox.Show("Category deleted successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        clearFields();
+                        MessageBox.Show(AppConstants.CategoryDeletedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ClearFields();
                         LoadCategories();
                     }
                     else
                     {
-                        MessageBox.Show("Failed to delete category", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(AppConstants.CategoryDeleteFailedError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
             {
-                MessageBox.Show("Please select a category to delete", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.SelectCategoryToDeleteError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -167,7 +163,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
                 if (row.Cells[0].Value != null && row.Cells[1].Value != null && row.Cells[2].Value != null && row.Cells[3].Value != null)
                 {
-                    getId = Convert.ToInt32(row.Cells[0].Value);
+                    _selectedCategoryId = Convert.ToInt32(row.Cells[0].Value);
                     category_name.Text = row.Cells[1].Value?.ToString() ?? string.Empty;
                     category_type.SelectedItem = row.Cells[2].Value?.ToString() ?? string.Empty;
                     category_status.SelectedItem = row.Cells[3].Value?.ToString() ?? string.Empty;

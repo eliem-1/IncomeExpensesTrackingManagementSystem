@@ -51,8 +51,8 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                using var cmd = new SqlCommand("SELECT * FROM category WHERE user_id = @user_id", connect);
-                cmd.Parameters.AddWithValue("@user_id", userId);
+                using var cmd = new SqlCommand(AppConstants.SelectAllCategories, connect);
+                cmd.Parameters.AddWithValue(AppConstants.ParamUserId, userId);
                 using var reader = cmd.ExecuteReader();
 
                 while (reader.Read())
@@ -87,7 +87,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 Category = reader["cate_name"]?.ToString() ?? string.Empty,
                 Type = reader["cate_type"]?.ToString() ?? string.Empty,
                 Status = reader["cate_status"]?.ToString() ?? string.Empty,
-                Date = dateValue?.ToString("MM-dd-yyyy") ?? string.Empty
+                Date = dateValue?.ToString(AppConstants.DateFormat) ?? string.Empty
             };
         }
 
@@ -109,17 +109,15 @@ namespace IncomeExpensesTrackingManagementSystem
 
             try
             {
-                string insertQuery = "INSERT INTO category (user_id, cate_name, cate_type, cate_status) VALUES (@user_id, @cate_name, @cate_type, @cate_status)";
-
                 var parameters = new Dictionary<string, object>
                 {
-                    { "@user_id", userId },
-                    { "@cate_name", name.Trim() },
-                    { "@cate_type", type.Trim() },
-                    { "@cate_status", status.Trim() }
+                    { AppConstants.ParamUserId, userId },
+                    { AppConstants.ParamCategoryName, name.Trim() },
+                    { AppConstants.ParamCategoryType, type.Trim() },
+                    { AppConstants.ParamCategoryStatus, status.Trim() }
                 };
 
-                return ExecuteCommand(insertQuery, parameters) > 0;
+                return ExecuteCommand(AppConstants.InsertCategory, parameters) > 0;
             }
             catch (Exception ex)
             {
@@ -148,18 +146,16 @@ namespace IncomeExpensesTrackingManagementSystem
 
             try
             {
-                string updateQuery = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id AND user_id = @user_id";
-
                 var parameters = new Dictionary<string, object>
                 {
-                    { "@user_id", userId },
-                    { "@cate_id", id },
-                    { "@cate_name", name.Trim() },
-                    { "@cate_type", type.Trim() },
-                    { "@cate_status", status.Trim() }
+                    { AppConstants.ParamUserId, userId },
+                    { AppConstants.ParamCategoryId, id },
+                    { AppConstants.ParamCategoryName, name.Trim() },
+                    { AppConstants.ParamCategoryType, type.Trim() },
+                    { AppConstants.ParamCategoryStatus, status.Trim() }
                 };
 
-                return ExecuteCommand(updateQuery, parameters) > 0;
+                return ExecuteCommand(AppConstants.UpdateCategory, parameters) > 0;
             }
             catch (Exception ex)
             {
@@ -183,15 +179,13 @@ namespace IncomeExpensesTrackingManagementSystem
 
             try
             {
-                string deleteQuery = "DELETE FROM category WHERE cate_id = @cate_id AND user_id = @user_id";
-
                 var parameters = new Dictionary<string, object>
                 {
-                    { "@user_id", userId },
-                    { "@cate_id", id }
+                    { AppConstants.ParamUserId, userId },
+                    { AppConstants.ParamCategoryId, id }
                 };
 
-                return ExecuteCommand(deleteQuery, parameters) > 0;
+                return ExecuteCommand(AppConstants.DeleteCategory, parameters) > 0;
             }
             catch (Exception ex)
             {

@@ -57,14 +57,14 @@ namespace IncomeExpensesTrackingManagementSystem
                 // Format date column
                 if (income_dataGridView.Columns["trans_date"] is DataGridViewColumn dateColumn)
                 {
-                    dateColumn.DefaultCellStyle.Format = "MM-dd-yyyy";
+                    dateColumn.DefaultCellStyle.Format = AppConstants.DateFormat;
                 }
 
                 LoadIncomeCategories();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading income data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error loading income data: {ex.Message}", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -92,7 +92,7 @@ namespace IncomeExpensesTrackingManagementSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading categories: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.LoadingCategoriesError + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -124,8 +124,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
                     if (_selectedTransactionId.HasValue)
                     {
-                        string updateQuery = "UPDATE transactions SET cate_id = @cate_id, trans_amount = @trans_amount, trans_description = @trans_description, trans_date = @trans_date WHERE trans_id = @trans_id AND user_id = @user_id AND trans_type = 'Income'";
-                        using var updateCmd = new SqlCommand(updateQuery, connect);
+                        using var updateCmd = new SqlCommand(AppConstants.UpdateIncomeTransaction, connect);
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamCategoryId, selectedCategory.Id);
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamAmount, amount);
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamDescription, income_description.Text.Trim());
@@ -134,7 +133,7 @@ namespace IncomeExpensesTrackingManagementSystem
                         updateCmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                         updateCmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Income updated successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(AppConstants.IncomeUpdatedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
@@ -148,7 +147,7 @@ namespace IncomeExpensesTrackingManagementSystem
 
                         cmd.ExecuteNonQuery();
 
-                        MessageBox.Show("Income added successfully!", AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(AppConstants.IncomeAddedSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
 
                     ResetFormState();
@@ -173,7 +172,7 @@ namespace IncomeExpensesTrackingManagementSystem
                     object? transIdValue = income_dataGridView.SelectedRows[0].Cells[0].Value;
                     if (transIdValue is null || transIdValue == DBNull.Value)
                     {
-                        MessageBox.Show("Please select a valid income record", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(AppConstants.SelectValidIncomeRecordError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -187,7 +186,7 @@ namespace IncomeExpensesTrackingManagementSystem
                     using var connect = new SqlConnection(_connectionString);
                     connect.Open();
 
-                    using var cmd = new SqlCommand("DELETE FROM transactions WHERE trans_id = @trans_id AND user_id = @user_id", connect);
+                    using var cmd = new SqlCommand(AppConstants.DeleteTransaction, connect);
                     cmd.Parameters.AddWithValue(AppConstants.ParamTransactionId, transId);
                     cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                     cmd.ExecuteNonQuery();
@@ -203,7 +202,7 @@ namespace IncomeExpensesTrackingManagementSystem
             }
             else
             {
-                MessageBox.Show("Please select an income record to delete", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.SelectIncomeToDeleteError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -222,7 +221,7 @@ namespace IncomeExpensesTrackingManagementSystem
         {
             if (!_selectedTransactionId.HasValue)
             {
-                MessageBox.Show("Please select an income record to update", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.SelectIncomeToUpdateError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -306,7 +305,8 @@ namespace IncomeExpensesTrackingManagementSystem
         /// </summary>
         private void IncomeForm_Load(object sender, EventArgs e)
         {
-            LoadIncomeData();
+            if (_currentUserId > 0)
+                LoadIncomeData();
         }
     }
 }

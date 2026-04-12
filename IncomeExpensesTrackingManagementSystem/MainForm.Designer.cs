@@ -52,6 +52,7 @@
             // 
             // panel1
             // 
+            panel1.BackColor = Color.Green;
             panel1.Controls.Add(pictureBox1);
             panel1.Controls.Add(label1);
             panel1.Controls.Add(close_click);
@@ -77,19 +78,21 @@
             label1.AutoSize = true;
             label1.Cursor = Cursors.Hand;
             label1.Font = new Font("Arial Rounded MT Bold", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label1.ForeColor = Color.White;
             label1.Location = new Point(55, 16);
             label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
             label1.Size = new Size(269, 21);
             label1.TabIndex = 3;
-            label1.Text = "Income and Expense Tracker";
+            label1.Text = "Income and Expenses Tracker";
             // 
             // close_click
             // 
             close_click.AutoSize = true;
             close_click.Cursor = Cursors.Hand;
             close_click.Font = new Font("Arial Rounded MT Bold", 10.8F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            close_click.Location = new Point(1651, 11);
+            close_click.ForeColor = Color.White;
+            close_click.Location = new Point(1651, 16);
             close_click.Margin = new Padding(4, 0, 4, 0);
             close_click.Name = "close_click";
             close_click.Size = new Size(21, 21);

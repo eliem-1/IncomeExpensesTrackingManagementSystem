@@ -60,7 +60,7 @@ namespace IncomeExpensesTrackingManagementSystem
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error initializing forms: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error initializing forms: {ex.Message}", AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

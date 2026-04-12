@@ -52,9 +52,9 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void LoginBtn_Click(object sender, EventArgs e)
         {
-            if (login_username.Text == "" || login_password.Text == "")
+            if (string.IsNullOrWhiteSpace(login_username.Text) || string.IsNullOrWhiteSpace(login_password.Text))
             {
-                MessageBox.Show("Please fill all blank fields", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.FillAllFieldsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
@@ -63,10 +63,8 @@ namespace IncomeExpensesTrackingManagementSystem
                     using SqlConnection connect = new(DatabaseSetup.ConnectionString);
                     connect.Open();
 
-                    string selectData = "SELECT id, password FROM users WHERE username = @usern";
-
-                    using SqlCommand cmd = new(selectData, connect);
-                    cmd.Parameters.AddWithValue("@usern", login_username.Text.Trim());
+                    using SqlCommand cmd = new(AppConstants.SelectUserByUsername, connect);
+                    cmd.Parameters.AddWithValue(AppConstants.ParamUsername, login_username.Text.Trim());
 
                     SqlDataAdapter adapter = new(cmd);
                     DataTable table = new();
@@ -75,8 +73,8 @@ namespace IncomeExpensesTrackingManagementSystem
 
                     if (table.Rows.Count > 0)
                     {
-                        int userId = (int)table.Rows[0]["id"];
-                        string storedPassword = Convert.ToString(table.Rows[0]["password"]) ?? string.Empty;
+                        int userId = (int)table.Rows[0][AppConstants.ColumnId];
+                        string storedPassword = Convert.ToString(table.Rows[0][AppConstants.ColumnPassword]) ?? string.Empty;
                         string enteredPassword = login_password.Text.Trim();
 
                         bool isValidPassword = PasswordHasher.IsHashedFormat(storedPassword)
@@ -85,20 +83,19 @@ namespace IncomeExpensesTrackingManagementSystem
 
                         if (!isValidPassword)
                         {
-                            MessageBox.Show("Incorrect username/password.", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(AppConstants.IncorrectCredentialsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return;
                         }
 
                         if (!PasswordHasher.IsHashedFormat(storedPassword))
                         {
-                            string upgradePassword = "UPDATE users SET password = @new_pass WHERE id = @id";
-                            using SqlCommand upgradeCmd = new(upgradePassword, connect);
-                            upgradeCmd.Parameters.AddWithValue("@new_pass", PasswordHasher.Hash(enteredPassword));
-                            upgradeCmd.Parameters.AddWithValue("@id", userId);
+                            using SqlCommand upgradeCmd = new(AppConstants.UpdateUserPassword, connect);
+                            upgradeCmd.Parameters.AddWithValue(AppConstants.ParamNewPassword, PasswordHasher.Hash(enteredPassword));
+                            upgradeCmd.Parameters.AddWithValue(AppConstants.ParamId, userId);
                             upgradeCmd.ExecuteNonQuery();
                         }
 
-                        MessageBox.Show("Login successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(AppConstants.LoginSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         MainForm mform = new();
                         mform.SetUserId(userId, login_username.Text.Trim());
@@ -108,12 +105,12 @@ namespace IncomeExpensesTrackingManagementSystem
                     }
                     else
                     {
-                        MessageBox.Show("Incorrect username/password.", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(AppConstants.IncorrectCredentialsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

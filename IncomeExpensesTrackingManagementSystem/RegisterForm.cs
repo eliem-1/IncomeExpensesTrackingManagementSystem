@@ -58,17 +58,17 @@ namespace IncomeExpensesTrackingManagementSystem
 
         private void RegisterBtn_Click(object sender, EventArgs e)
         {
-            if (register_username.Text == "" || register_password.Text == "" || register_cPassword.Text == "")
+            if (string.IsNullOrWhiteSpace(register_username.Text) || string.IsNullOrWhiteSpace(register_password.Text) || string.IsNullOrWhiteSpace(register_cPassword.Text))
             {
-                MessageBox.Show("Please fill all blank fields", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.FillAllFieldsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else if (register_password.Text.Length < 8)
+            else if (register_password.Text.Length < AppConstants.MinimumPasswordLength)
             {
-                MessageBox.Show("Invalid password, at least 8 characters are needed", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.PasswordTooShortError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else if (register_password.Text != register_cPassword.Text)
             {
-                MessageBox.Show("Password does not match", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(AppConstants.PasswordMismatchError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             else
             {
@@ -77,11 +77,8 @@ namespace IncomeExpensesTrackingManagementSystem
                     using var connect = new SqlConnection(DatabaseSetup.ConnectionString);
                     connect.Open();
 
-                    // CHECK IF THE USERNAME YOU WANT TO REGISTER IS ALREADY EXIST
-                    string selectUsername = "SELECT * FROM users WHERE username = @usern";
-
-                    using var checkUser = new SqlCommand(selectUsername, connect);
-                    checkUser.Parameters.AddWithValue("@usern", register_username.Text.Trim());
+                    using var checkUser = new SqlCommand(AppConstants.CheckUserExists, connect);
+                    checkUser.Parameters.AddWithValue(AppConstants.ParamUsername, register_username.Text.Trim());
                     using var adapter = new SqlDataAdapter();
                     DataTable table = new();
 
@@ -90,24 +87,19 @@ namespace IncomeExpensesTrackingManagementSystem
 
                     if (table.Rows.Count != 0)
                     {
-                        // TO PUT THE FIRST LETTER TO BIG LETTER
-                        string tempUsern = register_username.Text.Substring(0, 1).ToUpper() + register_username.Text.Substring(1);
-                        MessageBox.Show(tempUsern + " is existing already", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        string tempUsern = string.Concat(register_username.Text[..1].ToUpper(), register_username.Text[1..]);
+                        MessageBox.Show(tempUsern + AppConstants.UserExistsError, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     else
                     {
-                        string insertData = "INSERT INTO users (username, password, date_create) VALUES(@usern, @pass, @date)";
-
-                        using var insertUser = new SqlCommand(insertData, connect);
-                        insertUser.Parameters.AddWithValue("@usern", register_username.Text.Trim());
-                        insertUser.Parameters.AddWithValue("@pass", PasswordHasher.Hash(register_password.Text.Trim()));
-
-                        DateTime today = DateTime.Today; // DATE NOW
-                        insertUser.Parameters.AddWithValue("@date", today);
+                        using var insertUser = new SqlCommand(AppConstants.InsertUser, connect);
+                        insertUser.Parameters.AddWithValue(AppConstants.ParamUsername, register_username.Text.Trim());
+                        insertUser.Parameters.AddWithValue(AppConstants.ParamPassword, PasswordHasher.Hash(register_password.Text.Trim()));
+                        insertUser.Parameters.AddWithValue(AppConstants.ParamDate, DateTime.Today);
 
                         insertUser.ExecuteNonQuery();
 
-                        MessageBox.Show("Registered successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(AppConstants.RegisteredSuccessfully, AppConstants.InfoTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                         Form1 loginForm = new();
                         loginForm.Show();
 
@@ -116,7 +108,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error: " + ex.Message, AppConstants.ErrorTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
