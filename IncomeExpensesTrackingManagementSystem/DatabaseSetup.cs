@@ -35,8 +35,8 @@ namespace IncomeExpensesTrackingManagementSystem
                 // Create connection to LocalDB
                 string masterConnection = @"Data Source=(LocalDB)\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True;Connect Timeout=30;Encrypt=False";
 
-                using (SqlConnection connection = new(masterConnection))
                 {
+                    using SqlConnection connection = new(masterConnection);
                     connection.Open();
 
                     // Create the database if it doesn't exist
@@ -54,17 +54,15 @@ namespace IncomeExpensesTrackingManagementSystem
                             );
                         END";
 
-                    using (SqlCommand cmd = new(createDbQuery, connection))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
+                    using SqlCommand cmd = new(createDbQuery, connection);
+                    cmd.ExecuteNonQuery();
                 }
 
                 // Connect to the newly created database and create tables
                 string dbConnection = ConnectionString;
 
-                using (SqlConnection connection = new(dbConnection))
                 {
+                    using SqlConnection connection = new(dbConnection);
                     connection.Open();
 
                     // Create users table
@@ -79,10 +77,8 @@ namespace IncomeExpensesTrackingManagementSystem
                             );
                         END";
 
-                    using (SqlCommand cmd = new SqlCommand(createUsersTableQuery, connection))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
+                    using SqlCommand usersCmd = new(createUsersTableQuery, connection);
+                    usersCmd.ExecuteNonQuery();
 
                     // Create category table
                     string createCategoryTableQuery = @"
@@ -101,24 +97,14 @@ namespace IncomeExpensesTrackingManagementSystem
                         ELSE IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'category' AND COLUMN_NAME = 'cate_date')
                         BEGIN
                             ALTER TABLE category ADD cate_date DATE NULL DEFAULT CAST(GETDATE() AS DATE);
-                        END";
-
-                    using (SqlCommand cmd = new SqlCommand(createCategoryTableQuery, connection))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
-
-                    // Add user_id column to category table if it doesn't exist
-                    string addUserIdToCategoryQuery = @"
+                        END
                         IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'category' AND COLUMN_NAME = 'user_id')
                         BEGIN
                             ALTER TABLE category ADD user_id INT NULL;
                         END";
 
-                    using (SqlCommand cmd = new SqlCommand(addUserIdToCategoryQuery, connection))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
+                    using SqlCommand categoryCmd = new(createCategoryTableQuery, connection);
+                    categoryCmd.ExecuteNonQuery();
 
                     // Create transactions table
                     string createTransactionsTableQuery = @"
@@ -137,10 +123,8 @@ namespace IncomeExpensesTrackingManagementSystem
                             );
                         END";
 
-                    using (SqlCommand cmd = new SqlCommand(createTransactionsTableQuery, connection))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
+                    using SqlCommand transactionsCmd = new(createTransactionsTableQuery, connection);
+                    transactionsCmd.ExecuteNonQuery();
                 }
             }
             catch (Exception ex)

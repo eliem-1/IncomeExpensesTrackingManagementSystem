@@ -48,16 +48,14 @@ namespace IncomeExpensesTrackingManagementSystem
                 income_dataGridView.DataSource = dt;
 
                 // Format amount column as currency
-                DataGridViewColumn? amountColumn = income_dataGridView.Columns["trans_amount"];
-                if (amountColumn != null)
+                if (income_dataGridView.Columns["trans_amount"] is DataGridViewColumn amountColumn)
                 {
                     amountColumn.DefaultCellStyle.Format = AppConstants.CurrencyFormat;
                     amountColumn.DefaultCellStyle.FormatProvider = UsCulture;
                 }
 
                 // Format date column
-                DataGridViewColumn? dateColumn = income_dataGridView.Columns["trans_date"];
-                if (dateColumn != null)
+                if (income_dataGridView.Columns["trans_date"] is DataGridViewColumn dateColumn)
                 {
                     dateColumn.DefaultCellStyle.Format = "MM-dd-yyyy";
                 }
@@ -82,7 +80,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 using var connect = new SqlConnection(_connectionString);
                 connect.Open();
 
-                using var cmd = new SqlCommand("SELECT cate_id, cate_name FROM category WHERE user_id = @user_id AND cate_type IN ('Income', 'Incomes') AND cate_status = 'Active'", connect);
+                using var cmd = new SqlCommand(AppConstants.SelectIncomeCategories, connect);
                 cmd.Parameters.AddWithValue(AppConstants.ParamUserId, _currentUserId);
                 using var reader = cmd.ExecuteReader();
                 while (reader.Read())

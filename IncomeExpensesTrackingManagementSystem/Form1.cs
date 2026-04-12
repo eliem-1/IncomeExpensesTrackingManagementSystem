@@ -3,19 +3,12 @@ namespace IncomeExpensesTrackingManagementSystem
     using System;
     using System.Data;
     using System.Data.SqlClient;
-    using System.Windows.Forms;
 
     public partial class Form1 : Form
     {
-        readonly SqlConnection connect = new(DatabaseSetup.ConnectionString);
         public Form1()
         {
             InitializeComponent();
-        }
-
-        public bool CheckConnection()
-        {
-            return connect.State == ConnectionState.Closed;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -32,15 +25,6 @@ namespace IncomeExpensesTrackingManagementSystem
         private void CloseForm(object sender, EventArgs e)
         {
             this.Close();
-        }
-
-        private void Button1_Click(object sender, EventArgs e)
-        {
-            // Call dotnet clean
-            System.Diagnostics.Process.Start("dotnet", "clean");
-
-            // Call dotnet build
-            System.Diagnostics.Process.Start("dotnet", "build");
         }
 
         private void Panel1_Paint(object sender, PaintEventArgs e)

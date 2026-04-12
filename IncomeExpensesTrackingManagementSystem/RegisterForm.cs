@@ -1,25 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 using System.Data.SqlClient;
 
 namespace IncomeExpensesTrackingManagementSystem
 {
     public partial class RegisterForm : Form
     {
-        SqlConnection connect = new(DatabaseSetup.ConnectionString);
         public RegisterForm()
         {
             InitializeComponent();
-        }
-
-        public bool CheckConnection()
-        {
-            return (connect.State == ConnectionState.Closed) ? true : false;
         }
 
 
@@ -58,7 +47,7 @@ namespace IncomeExpensesTrackingManagementSystem
             Form1 loginForm = new();
             loginForm.Show();
 
-            this.Hide();
+            this.Close();
         }
 
         private void RegisterShowPassCheckedChanged(object sender, EventArgs e)
@@ -83,60 +72,51 @@ namespace IncomeExpensesTrackingManagementSystem
             }
             else
             {
-                if (CheckConnection())
+                try
                 {
-                    try
+                    using var connect = new SqlConnection(DatabaseSetup.ConnectionString);
+                    connect.Open();
+
+                    // CHECK IF THE USERNAME YOU WANT TO REGISTER IS ALREADY EXIST
+                    string selectUsername = "SELECT * FROM users WHERE username = @usern";
+
+                    using var checkUser = new SqlCommand(selectUsername, connect);
+                    checkUser.Parameters.AddWithValue("@usern", register_username.Text.Trim());
+                    using var adapter = new SqlDataAdapter();
+                    DataTable table = new();
+
+                    adapter.SelectCommand = checkUser;
+                    adapter.Fill(table);
+
+                    if (table.Rows.Count != 0)
                     {
-                        // CHECK IF THE USERNAME YOU WANT TO REGISTER IS ALREADY EXIST
-                        string selectUsername = "SELECT * FROM users WHERE username = @usern";
-
-                        using var checkUser = new SqlCommand(selectUsername, connect);
-                        checkUser.Parameters.AddWithValue("@usern", register_username.Text.Trim());
-                        using var adapter = new SqlDataAdapter();
-                        DataTable table = new();
-
-                        adapter.SelectCommand = checkUser;
-                        adapter.Fill(table);
-
-                        if (table.Rows.Count != 0)
-                        {
-                            // TO PUT THE FIRST LETTER TO BIG LETTER
-                            string tempUsern = register_username.Text.Substring(0, 1).ToUpper() + register_username.Text.Substring(1);
-                            MessageBox.Show(tempUsern + " is existing already", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        else
-                        {
-                            connect.Open();
-
-                            string insertData = "INSERT INTO users (username, password, date_create) VALUES(@usern, @pass, @date)";
-
-                            using var insertUser = new SqlCommand(insertData, connect);
-                            insertUser.Parameters.AddWithValue("@usern", register_username.Text.Trim());
-                            insertUser.Parameters.AddWithValue("@pass", PasswordHasher.Hash(register_password.Text.Trim()));
-
-                            DateTime today = DateTime.Today; // DATE NOW
-                            insertUser.Parameters.AddWithValue("@date", today);
-
-                            insertUser.ExecuteNonQuery();
-
-                            MessageBox.Show("Registered successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            Form1 loginForm = new();
-                            loginForm.Show();
-
-                            this.Hide();
-                        }
+                        // TO PUT THE FIRST LETTER TO BIG LETTER
+                        string tempUsern = register_username.Text.Substring(0, 1).ToUpper() + register_username.Text.Substring(1);
+                        MessageBox.Show(tempUsern + " is existing already", "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        string insertData = "INSERT INTO users (username, password, date_create) VALUES(@usern, @pass, @date)";
+
+                        using var insertUser = new SqlCommand(insertData, connect);
+                        insertUser.Parameters.AddWithValue("@usern", register_username.Text.Trim());
+                        insertUser.Parameters.AddWithValue("@pass", PasswordHasher.Hash(register_password.Text.Trim()));
+
+                        DateTime today = DateTime.Today; // DATE NOW
+                        insertUser.Parameters.AddWithValue("@date", today);
+
+                        insertUser.ExecuteNonQuery();
+
+                        MessageBox.Show("Registered successfully!", "Information Message", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Form1 loginForm = new();
+                        loginForm.Show();
+
+                        this.Close();
                     }
-                    finally
-                    {
-                        if (connect.State == ConnectionState.Open)
-                        {
-                            connect.Close();
-                        }
-                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error: " + ex.Message, "Error Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }

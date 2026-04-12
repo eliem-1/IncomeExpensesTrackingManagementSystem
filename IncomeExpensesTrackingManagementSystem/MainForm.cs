@@ -121,7 +121,7 @@ namespace IncomeExpensesTrackingManagementSystem
                 Form1 loginForm = new();
                 loginForm.Show();
 
-                this.Hide();
+                this.Close();
             }
         }
     }

@@ -68,17 +68,11 @@ namespace IncomeExpensesTrackingManagementSystem
                 expense_dataGridView.DataSource = dt;
 
                 DataGridViewColumn? amountColumn = expense_dataGridView.Columns[AppConstants.ColumnAmount];
-                if (amountColumn != null)
-                {
-                    amountColumn.DefaultCellStyle.Format = AppConstants.CurrencyFormat;
-                    amountColumn.DefaultCellStyle.FormatProvider = UsCulture;
-                }
+                amountColumn?.DefaultCellStyle.Format = AppConstants.CurrencyFormat;
+                amountColumn?.DefaultCellStyle.FormatProvider = UsCulture;
 
                 DataGridViewColumn? dateColumn = expense_dataGridView.Columns["trans_date"];
-                if (dateColumn != null)
-                {
-                    dateColumn.DefaultCellStyle.Format = "MM-dd-yyyy";
-                }
+                dateColumn?.DefaultCellStyle.Format = "MM-dd-yyyy";
             }
             catch (Exception ex)
             {

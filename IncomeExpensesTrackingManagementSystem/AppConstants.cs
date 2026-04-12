@@ -43,7 +43,7 @@ namespace IncomeExpensesTrackingManagementSystem
         public const string UpdateUserPassword = "UPDATE users SET password = @new_pass WHERE id = @id";
 
         public const string SelectAllCategories = "SELECT * FROM category WHERE user_id = @user_id";
-        public const string SelectIncomeCategories = "SELECT cate_id, cate_name FROM category WHERE user_id = @user_id AND cate_type = 'Income' AND cate_status = 'Active'";
+        public const string SelectIncomeCategories = "SELECT cate_id, cate_name FROM category WHERE user_id = @user_id AND cate_type IN ('Income', 'Incomes') AND cate_status = 'Active'";
         public const string SelectExpenseCategories = "SELECT cate_id, cate_name FROM category WHERE user_id = @user_id AND cate_type IN ('Expense', 'Expenses') AND cate_status = 'Active'";
         public const string InsertCategory = "INSERT INTO category (user_id, cate_name, cate_type, cate_status) VALUES (@user_id, @cate_name, @cate_type, @cate_status)";
         public const string UpdateCategory = "UPDATE category SET cate_name = @cate_name, cate_type = @cate_type, cate_status = @cate_status WHERE cate_id = @cate_id AND user_id = @user_id";
